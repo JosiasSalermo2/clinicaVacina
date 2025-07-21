@@ -22,9 +22,10 @@ function ListagemAgendamento() {
 
   const carregarDados = async () => {
     try {
-      const [resAgendamento, resPacientes] = await Promise.all([
+      const [resAgendamento, resPacientes, resVacinas] = await Promise.all([
         axios.get(`${BASE_URL}/agendamentos`),
-        axios.get(`${BASE_URL}/pacientes`)
+        axios.get(`${BASE_URL}/pacientes`),
+        axios.get(`${BASE_URL}/vacinas`)
       ]);
 
       const mapaPacientes = resPacientes.data.reduce((map, p) => {
@@ -32,9 +33,15 @@ function ListagemAgendamento() {
         return map;
       }, {});
 
-      const agendamentosComNome = resAgendamento.data.map((a) => ({
-        ...a,
-        nomePaciente: mapaPacientes[a.pacienteId] || 'Não encontrado'
+      const mapaVacinas = resVacinas.data.reduce((map, vacina) => {
+        map[vacina.id] = vacina.vacina;
+        return map;
+      }, {});
+
+      const agendamentosComNome = resAgendamento.data.map((agendamento) => ({
+        ...agendamento,
+        nomePaciente: agendamento.pacienteId ? mapaPacientes[agendamento.pacienteId] : 'Não encontrado',
+        nomeVacina: agendamento.vacinaId ? mapaVacinas[agendamento.vacinaId] : 'Não encontrado'
       }));
 
       setAgendamentos(agendamentosComNome);
@@ -77,20 +84,20 @@ function ListagemAgendamento() {
               <table className="table table-hover">
                 <thead>
                   <tr>
-                    <th>ID</th>
                     <th>Data</th>
                     <th>Horário</th>
                     <th>Paciente</th>
+                    <th>Vacina</th>
                     <th>Ações</th>
                   </tr>
                 </thead>
                 <tbody>
                   {agendamentos.map((agendamento) => (
                     <tr key={agendamento.id}>
-                      <td>{agendamento.id}</td>
                       <td>{agendamento.dataAgendamento}</td>
                       <td>{agendamento.horarioAgendamento}</td>
                       <td>{agendamento.nomePaciente}</td>
+                      <td>{agendamento.nomeVacina}</td>
                       <td>
                         <Stack spacing={1} padding={0} direction="row">
                           <IconButton onClick={() => redirecionarEdicao(agendamento.id)}>
