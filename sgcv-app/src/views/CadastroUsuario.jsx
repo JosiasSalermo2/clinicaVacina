@@ -1,62 +1,94 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
-import Card from '../components/Card';
-import FormGroup from '../components/FormGroup';
-import { mensagemSucesso, mensagemErro } from '../components/toastr';
+import Stack from "@mui/material/Stack";
+import TextField from "@mui/material/TextField";
+import Autocomplete from "@mui/material/Autocomplete";
 
-import Stack from '@mui/material/Stack';
-import { BASE_URL } from '../config/axios';
+import Card from "../components/Card";
+import { mensagemSucesso, mensagemErro } from "../components/toastr";
+import FormGroup from "../components/FormGroup";
+import LoadingOverlay from "../LoadingOverlay";
 
-const baseURL = `${BASE_URL}/usuarios`;
+import "../custom.css";
+import axios from "axios";
+import { BASE_URL } from "../config/axios";
 
 function CadastroUsuario() {
   const { idParam } = useParams();
   const navigate = useNavigate();
+  const baseURL = `${BASE_URL}/usuarios`;
 
-  const [login, setLogin] = useState('');
-  const [cpf, setCpf] = useState('');
+  const [login, setLogin] = useState("");
+  const [cpf, setCpf] = useState("");
   const [admin, setAdmin] = useState(false);
+
+  const [loading, setLoading] = useState(true);
+  const [erros, setErros] = useState({});
 
   useEffect(() => {
     if (idParam) {
-      const buscar = async () => {
-        try {
-          const response = await axios.get(`${baseURL}/${idParam}`);
-          const usuario = response.data;
-          setLogin(usuario.login);
-          setCpf(usuario.cpf);
-          setAdmin(usuario.admin);
-        } catch (error) {
-          mensagemErro('Erro ao carregar os dados do usuário.');
-        }
-      };
-
       buscar();
+    } else {
+      setLoading(false);
     }
   }, [idParam]);
 
-  const salvar = async () => {
+  async function buscar() {
+    try {
+      const response = await axios.get(`${baseURL}/${idParam}`);
+      const usuario = response.data;
+      setLogin(usuario.login || "");
+      setCpf(usuario.cpf || "");
+      setAdmin(usuario.admin || false);
+    } catch (error) {
+      console.error("Erro ao buscar os dados:", error);
+      mensagemErro("Erro ao buscar os dados");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function salvar() {
+    const novosErros = {};
+
+    if (!String(login || "").trim()) {
+      novosErros.login = "Informe o login.";
+    }
+    if (!String(cpf || "").trim()) {
+      novosErros.cpf = "Informe o CPF.";
+    }
+
+    setErros(novosErros);
+
+    if (Object.keys(novosErros).length > 0) {
+      mensagemErro("Preencha todos os campos obrigatórios corretamente.");
+      return;
+    }
+
     const data = { login, cpf, admin };
 
     try {
       if (idParam) {
         await axios.put(`${baseURL}/${idParam}`, data);
-        mensagemSucesso('Usuário atualizado com sucesso!');
+        mensagemSucesso("Usuário atualizado com sucesso!");
       } else {
         await axios.post(baseURL, data);
-        mensagemSucesso('Usuário cadastrado com sucesso!');
+        mensagemSucesso("Usuário cadastrado com sucesso!");
       }
-      navigate('/ListagemUsuarios');
+      navigate("/ListagemUsuarios");
     } catch (error) {
-      mensagemErro('Erro ao salvar usuário.');
+      mensagemErro(error?.response?.data || "Erro ao salvar usuário.");
     }
-  };
+  }
+
+  if (loading) {
+    return <div className="container">Carregando...</div>;
+  }
 
   return (
     <div className="container">
-      <Card title={idParam ? 'Editar Usuário' : 'Cadastrar Usuário'}>
+      <Card title={idParam ? "Editar Usuário" : "Cadastrar Usuário"}>
         <form>
           <div className="row">
             <div className="col-md-6 mb-3">
@@ -102,7 +134,11 @@ function CadastroUsuario() {
             <button type="button" className="btn btn-success" onClick={salvar}>
               Salvar
             </button>
-            <button type="button" className="btn btn-danger" onClick={() => navigate('/ListagemUsuarios')}>
+            <button
+              type="button"
+              className="btn btn-danger"
+              onClick={() => navigate("/ListagemUsuarios")}
+            >
               Cancelar
             </button>
           </Stack>
