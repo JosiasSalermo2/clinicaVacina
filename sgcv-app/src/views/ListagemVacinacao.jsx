@@ -1,124 +1,124 @@
-import React, { useState, useEffect } from 'react';
-import Card from '../components/Card';
-import { mensagemSucesso, mensagemErro } from '../components/toastr';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-import '../custom.css'
+import Card from "../components/Card";
+import LoadingOverlay from "../LoadingOverlay";
+import { mensagemSucesso, mensagemErro } from "../components/toastr";
 
-import { useNavigate } from 'react-router-dom';
-import LoadingOverlay from '../LoadingOverlay';
+import Stack from "@mui/material/Stack";
+import { IconButton } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 
-import Stack from '@mui/material/Stack';
-import { IconButton } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
+import { BASE_URL } from "../config/axios";
+import "../custom.css";
 
-import axios from 'axios';
-import { BASE_URL } from '../config/axios';
-
-const baseURL = `${BASE_URL}/agendamento`;
-
-
-function ListagemVacinacao() {
+function ListagemVacinacoes() {
   const navigate = useNavigate();
+  const [vacinacoes, setVacinacoes] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const cadastrar = () => {
-    navigate(`/CadastroVacinacao`);
+  useEffect(() => {
+    carregarDados();
+  }, []);
+
+  const carregarDados = async () => {
+    try {
+      const [resVacinacoes, resPacientes, resVacinas] = await Promise.all([
+        axios.get(`${BASE_URL}/vacinacoes`),
+        axios.get(`${BASE_URL}/pacientes`),
+        axios.get(`${BASE_URL}/vacinas`),
+      ]);
+
+      const mapaPacientes = resPacientes.data.reduce((map, p) => {
+        map[p.id] = p.nome;
+        return map;
+      }, {});
+
+      const mapaVacinas = resVacinas.data.reduce((map, vacina) => {
+        map[vacina.id] = vacina.vacina;
+        return map;
+      }, {});
+
+      const vacinacoesComNome = resVacinacoes.data.map((v) => ({
+        ...v,
+        nome: v.pacienteId ? mapaPacientes[v.pacienteId] : "Não encontrado",
+        nomeVacina: v.vacinaId ? mapaVacinas[v.vacinaId] : "Não encontrado",
+      }));
+
+      setVacinacoes(vacinacoesComNome);
+    } catch (error) {
+      mensagemErro("Erro ao carregar dados de vacinação ou pacientes.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const editar = (id) => {
+  const redirecionarCadastro = () => {
+    navigate("/CadastroVacinacao");
+  };
+
+  const redirecionarEdicao = (id) => {
     navigate(`/CadastroVacinacao/${id}`);
   };
 
-  const [dados, setDados] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  async function excluir(id) {
-    let data = JSON.stringify({ id });
-    let url = `${baseURL}/${id}`;
-    console.log(url);
-    await axios
-      .delete(url, data, {
-        headers: { 'Content-Type': 'application/json' },
-      })
-      .then(function (response) {
-        mensagemSucesso(`Vacinação excluído com sucesso!`);
-        setDados(
-          dados.filter((dado) => {
-            return dado.id !== id;
-          })
-        );
-      })
-      .catch(function (error) {
-        mensagemErro(`Erro ao excluir a vacinação`);
-      });
-  }
-
-
-
-  useEffect(() => {
-    axios.get(baseURL)
-      .then((response) => {
-        setDados(response.data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        mensagemErro(`Erro ao obter dados de vacinação: ${error.message}`);
-        setLoading(false);
-      });
-  }, []);
- 
-  if (!dados) return null;
+  const excluirVacinacao = async (id) => {
+    try {
+      await axios.delete(`${BASE_URL}/vacinacoes/${id}`);
+      mensagemSucesso("Vacinação excluída com sucesso.");
+      setVacinacoes((prev) => prev.filter((v) => v.id !== id));
+    } catch (error) {
+      mensagemErro("Erro ao excluir vacinação.");
+    }
+  };
 
   return (
-    <div className='container'>
+    <div className="container">
       <LoadingOverlay loading={loading} />
-      <Card title='Vacinação do Dia'>
-        <div className='row'>
-          <div className='col-lg-12'>
-            <div className='bs-component'>
+      <Card title="Vacinação do Dia">
+        <div className="row">
+          <div className="col-lg-12">
+            <div className="bs-component">
               <button
-                type='button'
-                className='btn btn-warning'
-                onClick={() => cadastrar()}
+                type="button"
+                className="btn btn-warning mb-3"
+                onClick={redirecionarCadastro}
               >
                 Nova Vacinação
               </button>
-              <table className='table table-hover'>
+              <table className="table table-hover">
                 <thead>
                   <tr>
-                    <th scope='col'>Nome Paciente</th>
-                    <th scope='col'>Data</th>
-                    <th scope='col'>Hora</th>
-                    <th scope='col'>Nome da Vacina</th>
+                    <th>Nome Paciente</th>
+                    <th>Data</th>
+                    <th>Ações</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {dados.map((dado) => (
-                    <tr key={dado.id}>
-                      <td>{dado.nome}</td>
-                      <td>{dado.dataVacinacao}</td>
-                      <td>{dado.horaVacinacao}</td>
-                      <td>{dado.nomeVacina}</td>
+                  {vacinacoes.map((v) => (
+                    <tr key={v.id}>
+                      <td>{v.nome}</td>
+                      <td>{v.dataAplicacao}</td>
                       <td>
-                        <Stack spacing={1} padding={0} direction='row'>
-                          <IconButton
-                            aria-label='edit'
-                            onClick={() => editar(dado.id)}
-                          >
+                        <Stack spacing={1} direction="row">
+                          <IconButton onClick={() => redirecionarEdicao(v.id)}>
                             <EditIcon />
                           </IconButton>
-                          <IconButton
-                            aria-label='delete'
-                            onClick={() => excluir(dado.id)}
-                          >
+                          <IconButton onClick={() => excluirVacinacao(v.id)}>
                             <DeleteIcon />
                           </IconButton>
                         </Stack>
                       </td>
                     </tr>
                   ))}
+                  {vacinacoes.length === 0 && !loading && (
+                    <tr>
+                      <td colSpan="5">Nenhum registro encontrado.</td>
+                    </tr>
+                  )}
                 </tbody>
-              </table>{' '}
+              </table>
             </div>
           </div>
         </div>
@@ -127,4 +127,4 @@ function ListagemVacinacao() {
   );
 }
 
-export default ListagemVacinacao;
+export default ListagemVacinacoes;
