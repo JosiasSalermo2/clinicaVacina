@@ -21,7 +21,7 @@ function CadastroUsuario() {
 
   const [login, setLogin] = useState("");
   const [cpf, setCpf] = useState("");
-  const [admin, setAdmin] = useState(false);
+  const [administrador, setAdministrador] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [erros, setErros] = useState({});
@@ -40,7 +40,7 @@ function CadastroUsuario() {
       const usuario = response.data;
       setLogin(usuario.login || "");
       setCpf(usuario.cpf || "");
-      setAdmin(usuario.admin || false);
+      setAdministrador(usuario.administrador || false);
     } catch (error) {
       console.error("Erro ao buscar os dados:", error);
       mensagemErro("Erro ao buscar os dados");
@@ -57,6 +57,8 @@ function CadastroUsuario() {
     }
     if (!String(cpf || "").trim()) {
       novosErros.cpf = "Informe o CPF.";
+    } else if (!validarCpf(cpf)) {
+      novosErros.cpf = "CPF inválido. Use o formato Ex: 123.456.789-09";
     }
 
     setErros(novosErros);
@@ -66,7 +68,7 @@ function CadastroUsuario() {
       return;
     }
 
-    const data = { login, cpf, admin };
+    const data = { login, cpf, administrador };
 
     try {
       if (idParam) {
@@ -86,6 +88,32 @@ function CadastroUsuario() {
     return <div className="container">Carregando...</div>;
   }
 
+  function formatarCpf(valor) {
+    return valor
+      .replace(/\D/g, "") // Remove tudo que não é número
+      .replace(/(\d{3})(\d)/, "$1.$2") // Coloca ponto depois dos 3 primeiros dígitos
+      .replace(/(\d{3})(\d)/, "$1.$2") // Segundo ponto
+      .replace(/(\d{3})(\d{1,2})$/, "$1-$2") // Traço antes dos dois últimos dígitos
+      .substring(0, 14); // Limita ao tamanho do CPF com formatação
+  }
+
+  function validarCpf(cpf) {
+    cpf = cpf.replace(/[^\d]+/g, "");
+    if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
+
+    let soma = 0;
+    for (let i = 0; i < 9; i++) soma += parseInt(cpf.charAt(i)) * (10 - i);
+    let resto = (soma * 10) % 11;
+    if (resto === 10 || resto === 11) resto = 0;
+    if (resto !== parseInt(cpf.charAt(9))) return false;
+
+    soma = 0;
+    for (let i = 0; i < 10; i++) soma += parseInt(cpf.charAt(i)) * (11 - i);
+    resto = (soma * 10) % 11;
+    if (resto === 10 || resto === 11) resto = 0;
+    return resto === parseInt(cpf.charAt(10));
+  }
+
   return (
     <div className="container">
       <Card title={idParam ? "Editar Usuário" : "Cadastrar Usuário"}>
@@ -96,8 +124,8 @@ function CadastroUsuario() {
                 <input
                   type="text"
                   id="inputLogin"
-                  className="form-control"
                   value={login}
+                  className={`form-control ${erros.login ? "is-invalid" : ""}`}
                   onChange={(e) => setLogin(e.target.value)}
                   required
                 />
@@ -108,9 +136,10 @@ function CadastroUsuario() {
                 <input
                   type="text"
                   id="inputCpf"
-                  className="form-control"
                   value={cpf}
-                  onChange={(e) => setCpf(e.target.value)}
+                  className={`form-control ${erros.cpf ? "is-invalid" : ""}`}
+                  onChange={(e) => setCpf(formatarCpf(e.target.value))}
+                  placeholder="Ex: 123.456.789-09"
                   required
                 />
               </FormGroup>
@@ -121,11 +150,11 @@ function CadastroUsuario() {
             <input
               className="form-check-input"
               type="checkbox"
-              checked={admin}
-              onChange={(e) => setAdmin(e.target.checked)}
-              id="checkAdmin"
+              checked={administrador}
+              onChange={(e) => setAdministrador(e.target.checked)}
+              id="checkAdministrador"
             />
-            <label className="form-check-label" htmlFor="checkAdmin">
+            <label className="form-check-label" htmlFor="checkAdministrador">
               Administrador
             </label>
           </div>

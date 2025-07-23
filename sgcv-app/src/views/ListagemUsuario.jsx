@@ -1,20 +1,24 @@
-import React, { useEffect, useState } from 'react';
-import Card from '../components/Card';
-import { mensagemSucesso, mensagemErro } from '../components/toastr';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-import { useNavigate } from 'react-router-dom';
-import Stack from '@mui/material/Stack';
-import { IconButton } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
+import Stack from "@mui/material/Stack";
 
-import axios from 'axios';
-import { BASE_URL } from '../config/axios';
+import Card from "../components/Card";
+import { mensagemSucesso, mensagemErro } from "../components/toastr";
+import LoadingOverlay from "../LoadingOverlay";
 
-const baseURL = `${BASE_URL}/usuarios`;
+import { IconButton } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+
+import "../custom.css";
+import axios from "axios";
+import { BASE_URL } from "../config/axios";
 
 function ListagemUsuarios() {
   const navigate = useNavigate();
+  const baseURL = `${BASE_URL}/usuarios`;
+
   const [usuarios, setUsuarios] = useState([]);
 
   const carregarUsuarios = async () => {
@@ -22,7 +26,7 @@ function ListagemUsuarios() {
       const response = await axios.get(baseURL);
       setUsuarios(response.data);
     } catch (error) {
-      mensagemErro('Erro ao carregar os usuários.');
+      mensagemErro("Erro ao carregar os usuários.");
     }
   };
 
@@ -31,7 +35,7 @@ function ListagemUsuarios() {
   }, []);
 
   const redirecionarCadastro = () => {
-    navigate('/CadastroUsuario');
+    navigate("/CadastroUsuario");
   };
 
   const redirecionarEdicao = (id) => {
@@ -41,10 +45,10 @@ function ListagemUsuarios() {
   const excluirUsuario = async (id) => {
     try {
       await axios.delete(`${baseURL}/${id}`);
-      mensagemSucesso('Usuário excluído com sucesso!');
+      mensagemSucesso("Usuário excluído com sucesso!");
       setUsuarios((prev) => prev.filter((usuario) => usuario.id !== id));
     } catch (error) {
-      mensagemErro('Erro ao excluir o usuário.');
+      mensagemErro("Erro ao excluir o usuário.");
     }
   };
 
@@ -75,13 +79,17 @@ function ListagemUsuarios() {
                     <tr key={usuario.id}>
                       <td>{usuario.login}</td>
                       <td>{usuario.cpf}</td>
-                      <td>{usuario.admin ? 'Sim' : 'Não'}</td>
+                      <td>{usuario.administrador ? "Sim" : "Não"}</td>
                       <td>
                         <Stack spacing={1} padding={0} direction="row">
-                          <IconButton onClick={() => redirecionarEdicao(usuario.id)}>
+                          <IconButton
+                            onClick={() => redirecionarEdicao(usuario.id)}
+                          >
                             <EditIcon />
                           </IconButton>
-                          <IconButton onClick={() => excluirUsuario(usuario.id)}>
+                          <IconButton
+                            onClick={() => excluirUsuario(usuario.id)}
+                          >
                             <DeleteIcon />
                           </IconButton>
                         </Stack>
