@@ -19,13 +19,15 @@ function ListagemCompra() {
   const [dadosCompra, setDadosCompra] = useState([]);
   const [listaFabricantes, setListaFabricantes] = useState([]);
   const [listaFornecedores, setListaFornecedores] = useState([]);
+  const [listaVacinas, setListaVacinas] = useState([]);
 
   const carregarDadosCompra = async () => {
     try {
-      const [resCompra, resFabricantes, resFornecedores] = await Promise.all([
-        axios.get(baseURL),
+      const [resCompra, resFabricantes, resFornecedores, resVacinas] = await Promise.all([
+        axios.get(`${BASE_URL}/compras`),
         axios.get(`${BASE_URL}/fabricantes`),
         axios.get(`${BASE_URL}/fornecedores`),
+        axios.get(`${BASE_URL}/vacinas`),
       ]);
 
       console.log('COMPRAS:', resCompra.data);
@@ -35,6 +37,7 @@ function ListagemCompra() {
       setDadosCompra(resCompra.data);
       setListaFabricantes(resFabricantes.data);
       setListaFornecedores(resFornecedores.data);
+      setListaVacinas(resVacinas.data);
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
       mensagemErro('Erro ao carregar dados da listagem.');
@@ -74,6 +77,11 @@ function ListagemCompra() {
     return fornecedor ? fornecedor.nomeFantasia : '---';
   };
 
+  const obterNomeVacina = (id) => {
+    const vacina = listaVacinas.find((f) => Number(f.id) === Number(id));
+    return vacina ? vacina.vacina : '---';
+  };
+
   return (
     <div className="container">
       <Card title="Compras">
@@ -92,6 +100,8 @@ function ListagemCompra() {
                   <tr>
                     <th>Data</th>
                     <th>Valor</th>
+                    <th>Vacina</th>
+                    <th>Quantidade de Vacinas</th>
                     <th>Fabricante</th>
                     <th>Fornecedor</th>
                     <th>Ações</th>
@@ -102,6 +112,8 @@ function ListagemCompra() {
                     <tr key={compra.id}>
                       <td>{new Date(compra.dataCompra).toLocaleDateString('pt-BR')}</td>
                       <td>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(compra.valor)}</td>
+                      <td>{obterNomeVacina(compra.vacinaId)}</td>
+                      <td>{compra.quantidadeVacina}</td>
                       <td>{obterNomeFabricante(compra.fabricanteId)}</td>
                       <td>{obterNomeFornecedor(compra.fornecedorId)}</td>
                       <td>

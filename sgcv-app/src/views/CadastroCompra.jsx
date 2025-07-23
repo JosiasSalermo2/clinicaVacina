@@ -29,15 +29,18 @@ function CadastroCompra() {
   const [id, setId] = useState('');
   const [valor, setValor] = useState('');
   const [dataCompra, setDataCompra] = useState('');
+  const [quantidadeVacina, setQuantidadeVacina] = useState('');
 
   // — IDs de relacionamento
   const [fornecedorId, setFornecedorId] = useState('');
   const [fabricanteId, setFabricanteId] = useState('');
+  const [vacinaId, setVacinaId] = useState('');
 
 
   // — Listas para selects (sempre arrays)
   const [fornecedores, setFornecedores] = useState([]);
   const [fabricantes, setFabricantes] = useState([]);
+  const [vacinas, setVacinas] = useState([]);
 
   //--- Controle de loading e edição --
   const [loading, setLoading] = useState(true);
@@ -53,6 +56,7 @@ function CadastroCompra() {
       setDataCompra(compra.dataCompra);
       setFornecedorId(compra.fornecedorId);
       setFabricanteId(compra.fabricanteId);
+      setVacinaId(compra.vacinaId);
     } catch (error) {
       console.error("Erro ao buscar compra:", error);
       mensagemErro("Compra não encontrada");
@@ -82,6 +86,10 @@ function CadastroCompra() {
       novosErros.fornecedorId = "Selecione o fornecedor.";
     }
 
+    if (!vacinaId) {
+      novosErros.vacinaId = "Selecione a vacina.";
+    }
+
     setErros(novosErros);
 
     if (Object.keys(novosErros).length > 0) {
@@ -94,6 +102,7 @@ function CadastroCompra() {
       dataCompra,
       fornecedorId: parseInt(fornecedorId),
       fabricanteId: parseInt(fabricanteId),
+      vacinaId: parseInt(vacinaId),
     };
 
     try {
@@ -124,6 +133,7 @@ function CadastroCompra() {
       setDataCompra('');
       setFornecedorId('');
       setFabricanteId('');
+      setVacinaId('');
     } else {
       buscarCompraPorId();
     }
@@ -169,6 +179,19 @@ function CadastroCompra() {
       }
     }
     carregarFornecedores();
+  }, []);
+
+  // - Vacinas 
+  useEffect(() => {
+    async function carregarVacinas() {
+      try {
+        const response = await axios.get(`${BASE_URL}/vacinas`);
+        setVacinas(response.data);
+      } catch (error) {
+        mensagemErro("Erro ao carregar vacinas.");
+      }
+    }
+    carregarVacinas();
   }, []);
 
 
@@ -220,6 +243,45 @@ function CadastroCompra() {
               </FormGroup>
             </div>
           </div>
+
+          <div className="row">
+            <div className="col-md-6 mb-3">
+              <FormGroup label="Vacina: *" htmlFor="selectVacina">
+                <select
+                  className={`form-select ${erros.vacinaId ? 'is-invalid' : ''}`}
+                  id="selectVacina"
+                  value={vacinaId}
+                  onChange={e => setVacinaId(e.target.value)}
+                >
+                  <option value="">Selecione a Vacina</option>
+                  {vacinas.map(vacina => (
+                    <option key={vacina.id} value={vacina.id}>
+                      {vacina.vacina}
+                    </option>
+                  ))}
+                </select>
+                {erros.vacinaId && <div className="invalid-feedback">{erros.vacinaId}</div>}
+
+              </FormGroup>
+            </div>
+            <div className="col-md-6 mb-3">
+              <FormGroup label="Quantidade de vacina: *" htmlFor="inputQuantidadeVacina">
+                <input
+                  type="number"
+                  id="inputQuantidadeVacina"
+                  value={quantidadeVacina}
+                  className={`form-control ${erros.quantidadeVacina ? 'is-invalid' : ''}`}
+                  name="quantidadeVacina"
+                  onChange={e => setQuantidadeVacina(e.target.value)}
+                />
+                {erros.quantidadeVacinaa && (
+                  <div className="invalid-feedback">{erros.quantidadeVacina}</div>
+                )}
+              </FormGroup>
+            </div>
+          </div>
+
+
           <div className="row">
             <div className="col-md-6 mb-3">
               <FormGroup label="Fabricante: *" htmlFor="selectFabricante">
