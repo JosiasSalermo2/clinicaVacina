@@ -1,110 +1,148 @@
-import React from 'react';
-import Card from '../components/Card';
-import { mensagemSucesso, mensagemErro } from '../components/toastr';
-import '../custom.css'
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-import { useNavigate } from 'react-router-dom';
+import Stack from "@mui/material/Stack";
 
-import Stack from '@mui/material/Stack';
-import { IconButton } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
+import Card from "../components/Card";
+import { mensagemErro, mensagemSucesso } from "../components/toastr";
+import LoadingOverlay from "../LoadingOverlay";
 
-import axios from 'axios';
-import { BASE_URL } from '../config/axios';
+import { IconButton } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 
-const baseURL = `${BASE_URL}/vacinas`;
+import "../custom.css";
+import axios from "axios";
+import { BASE_URL } from "../config/axios";
 
 function ListagemVacinas() {
   const navigate = useNavigate();
+  const baseURL = `${BASE_URL}/vacinas`;
 
-  const cadastrar = () => {
-    navigate(`/CadastroVacina`);
+  const [vacinas, setVacinas] = useState([]);
+  const [tiposVacina, setTiposVacina] = useState([]);
+  const [fabricantes, setFabricantes] = useState([]);
+  const [fornecedores, setFornecedores] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const carregarVacinas = async () => {
+    try {
+      const response = await axios.get(baseURL);
+      setVacinas(response.data);
+    } catch (error) {
+      mensagemErro("Erro ao carregar vacinas.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const editar = (id) => {
+  useEffect(() => {
+    carregarVacinas();
+    carregarListas();
+  }, []);
+
+  const carregarListas = async () => {
+    try {
+      const [resTipos, resFabs, resForns] = await Promise.all([
+        axios.get(`${BASE_URL}/tipos-vacinas`),
+        axios.get(`${BASE_URL}/fabricantes`),
+        axios.get(`${BASE_URL}/fornecedores`),
+      ]);
+      setTiposVacina(resTipos.data);
+      setFabricantes(resFabs.data);
+      setFornecedores(resForns.data);
+    } catch {
+      mensagemErro("Erro ao carregar listas auxiliares.");
+    }
+  };
+
+  const redirecionarCadastro = () => {
+    navigate("/CadastroVacina");
+  };
+
+  const redirecionarEdicao = (id) => {
     navigate(`/CadastroVacina/${id}`);
   };
 
-  const [dados, setDados] = React.useState(null);
-
-  async function excluir(id) {
-    let data = JSON.stringify({ id });
-    let url = `${baseURL}/${id}`;
-    console.log(url);
-    await axios
-      .delete(url, data, {
-        headers: { 'Content-Type': 'application/json' },
-      })
-      .then(function (response) {
-        mensagemSucesso(`Vacina excluida com sucesso!`);
-        setDados(
-          dados.filter((dado) => {
-            return dado.id !== id;
-          })
-        );
-      })
-      .catch(function (error) {
-        mensagemErro(`Erro ao excluir a Vacina`);
-      });
-  }
-
-
-  React.useEffect(() => {
-    axios.get(baseURL).then((response) => {
-      setDados(response.data);
-    });
-  }, []);
-
-  if (!dados) return null;
+  const excluirVacina = async (id) => {
+    try {
+      await axios.delete(`${baseURL}/${id}`);
+      mensagemSucesso("Vacina excluída com sucesso!");
+      setVacinas((prev) => prev.filter((vac) => vac.id !== id));
+    } catch (error) {
+      mensagemErro("Erro ao excluir vacina.");
+      console.error(
+        "Erro ao excluir vacina:",
+        error.response?.data || error.message,
+      );
+    }
+  };
 
   return (
-    <div className='container'>
-      <Card title='Vacinas'>
-        <div className='row'>
-          <div className='col-lg-12'>
-            <div className='bs-component'>
+    <div className="container">
+      <LoadingOverlay loading={loading} />
+      <Card title="Vacinas">
+        <div className="row">
+          <div className="col-lg-12">
+            <div className="bs-component">
               <button
-                type='button'
-                className='btn btn-warning'
-                onClick={() => cadastrar()}
+                type="button"
+                className="btn btn-warning"
+                onClick={redirecionarCadastro}
               >
                 Nova Vacina
               </button>
-              <table className='table table-hover'>
+              <table className="table table-hover">
                 <thead>
                   <tr>
-                    <th scope='col'>Nome</th>
-                    <th scope='col'>Descricao</th>
-                    <th scope='col'>Dose por Ampola</th>
-                    <th scope='col'>Validade</th>
+                    <th>Nome</th>
+                    <th>Indicação</th>
+                    <th>Contraindicação</th>
+                    <th>Doses por Ampola</th>
+                    <th>Tipo</th>
+                    <th>Fabricante</th>
+                    <th>Fornecedor</th>
+                    <th>Ações</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {dados.map((dado) => (
-                    <tr key={dado.id}>
-                      <td>{dado.nomeVacina}</td>
-                      <td>{dado.descricao}</td>
-                      <td>{dado.dosesAmpola}</td>
-                      <td>{dado.dataValidade}</td>
+                  {vacinas.map((vacina) => (
+                    <tr key={vacina.id}>
+                      <td>{vacina.vacina}</td>
+                      <td>{vacina.indicacao}</td>
+                      <td>{vacina.contraIndicacao}</td>
+                      <td>{vacina.dosesAmpola}</td>
                       <td>
-                        <Stack spacing={1} padding={0} direction='row'>
+                        {tiposVacina.find((t) => t.id === vacina.tipoVacinaId)
+                          ?.tipoVacina || "—"}
+                      </td>
+                      <td>
+                        {fabricantes.find((f) => f.id === vacina.fabricanteId)
+                          ?.nomeFantasia || "—"}
+                      </td>
+                      <td>
+                        {fornecedores.find((f) => f.id === vacina.fornecedorId)
+                          ?.nomeFantasia || "—"}
+                      </td>
+                      <td>
+                        <Stack spacing={1} padding={0} direction="row">
                           <IconButton
-                            aria-label='edit'
-                            onClick={() => editar(dado.id)}
+                            onClick={() => redirecionarEdicao(vacina.id)}
                           >
                             <EditIcon />
                           </IconButton>
-                          <IconButton
-                            aria-label='delete'
-                            onClick={() => excluir(dado.id)}
-                          >
+                          <IconButton onClick={() => excluirVacina(vacina.id)}>
                             <DeleteIcon />
                           </IconButton>
                         </Stack>
                       </td>
                     </tr>
                   ))}
+                  {vacinas.length === 0 && (
+                    <tr>
+                      <td colSpan="8">Nenhuma vacina cadastrada.</td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>

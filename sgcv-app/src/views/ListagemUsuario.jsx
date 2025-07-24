@@ -20,6 +20,7 @@ function ListagemUsuarios() {
   const baseURL = `${BASE_URL}/usuarios`;
 
   const [usuarios, setUsuarios] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const carregarUsuarios = async () => {
     try {
@@ -27,6 +28,8 @@ function ListagemUsuarios() {
       setUsuarios(response.data);
     } catch (error) {
       mensagemErro("Erro ao carregar os usuários.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -54,6 +57,7 @@ function ListagemUsuarios() {
 
   return (
     <div className="container">
+      <LoadingOverlay loading={loading} />
       <Card title="Usuários">
         <div className="row">
           <div className="col-lg-12">

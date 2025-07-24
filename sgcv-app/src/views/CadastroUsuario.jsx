@@ -116,6 +116,7 @@ function CadastroUsuario() {
 
   return (
     <div className="container">
+      <LoadingOverlay active={loading} />
       <Card title={idParam ? "Editar Usuário" : "Cadastrar Usuário"}>
         <form>
           <div className="row">
