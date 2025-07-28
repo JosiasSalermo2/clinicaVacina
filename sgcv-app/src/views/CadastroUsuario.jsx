@@ -68,7 +68,11 @@ function CadastroUsuario() {
       return;
     }
 
-    const data = { login, cpf, administrador };
+    const data = {
+      login,
+      cpf: cpf.replace(/[^\d]+/g, ""), // remove pontos e traço
+      administrador,
+    };
 
     try {
       if (idParam) {

@@ -25,10 +25,9 @@ function ListagemVacinacoes() {
 
   const carregarDados = async () => {
     try {
-      const [resVacinacoes, resPacientes, resVacinas] = await Promise.all([
+      const [resVacinacoes, resPacientes] = await Promise.all([
         axios.get(`${BASE_URL}/vacinacoes`),
         axios.get(`${BASE_URL}/pacientes`),
-        axios.get(`${BASE_URL}/vacinas`),
       ]);
 
       const mapaPacientes = resPacientes.data.reduce((map, p) => {
@@ -36,20 +35,15 @@ function ListagemVacinacoes() {
         return map;
       }, {});
 
-      const mapaVacinas = resVacinas.data.reduce((map, vacina) => {
-        map[vacina.id] = vacina.vacina;
-        return map;
-      }, {});
-
       const vacinacoesComNome = resVacinacoes.data.map((v) => ({
         ...v,
         nome: v.pacienteId ? mapaPacientes[v.pacienteId] : "Não encontrado",
-        nomeVacina: v.vacinaId ? mapaVacinas[v.vacinaId] : "Não encontrado",
+        data: v.dataAplicacao || "—",
       }));
 
       setVacinacoes(vacinacoesComNome);
     } catch (error) {
-      mensagemErro("Erro ao carregar dados de vacinação ou pacientes.");
+      mensagemErro("Erro ao carregar dados de vacinação.");
     } finally {
       setLoading(false);
     }
@@ -76,7 +70,7 @@ function ListagemVacinacoes() {
   return (
     <div className="container">
       <LoadingOverlay loading={loading} />
-      <Card title="Vacinação do Dia">
+      <Card title="Vacinações Registradas">
         <div className="row">
           <div className="col-lg-12">
             <div className="bs-component">
@@ -90,7 +84,7 @@ function ListagemVacinacoes() {
               <table className="table table-hover">
                 <thead>
                   <tr>
-                    <th>Nome Paciente</th>
+                    <th>Nome do Paciente</th>
                     <th>Data</th>
                     <th>Ações</th>
                   </tr>
@@ -99,7 +93,7 @@ function ListagemVacinacoes() {
                   {vacinacoes.map((v) => (
                     <tr key={v.id}>
                       <td>{v.nome}</td>
-                      <td>{v.dataAplicacao}</td>
+                      <td>{v.data}</td>
                       <td>
                         <Stack spacing={1} direction="row">
                           <IconButton onClick={() => redirecionarEdicao(v.id)}>
@@ -114,7 +108,7 @@ function ListagemVacinacoes() {
                   ))}
                   {vacinacoes.length === 0 && !loading && (
                     <tr>
-                      <td colSpan="5">Nenhum registro encontrado.</td>
+                      <td colSpan="3">Nenhum registro encontrado.</td>
                     </tr>
                   )}
                 </tbody>
