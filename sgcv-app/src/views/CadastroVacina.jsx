@@ -45,15 +45,15 @@ function CadastroVacina() {
 
   async function buscar() {
     try {
-      const response = await axios.get(`${BASE_URL}/${idParam}`);
+      const response = await axios.get(`${baseURL}/${idParam}`);
       const vacina = response.data;
       setVacina(vacina.vacina || "");
       setIndicacao(vacina.indicacao || "");
       setContraIndicacao(vacina.contraIndicacao || "");
       setDosesAmpola(vacina.dosesAmpola || "");
-      setTipoVacinaId(vacina.tipoVacinaId || "");
-      setFabricanteId(vacina.fabricanteId || "");
-      setFornecedorId(vacina.fornecedorId || "");
+      setTipoVacinaId(vacina.tipoVacinaId?.toString() || "");
+      setFabricanteId(vacina.fabricanteId?.toString() || "");
+      setFornecedorId(vacina.fornecedorId?.toString() || "");
     } catch (error) {
       console.error("Erro ao buscar vacina:", error);
       mensagemErro("Erro ao buscar os dados da vacina.");

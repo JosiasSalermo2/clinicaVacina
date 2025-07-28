@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+
 import Stack from "@mui/material/Stack";
 
 import Card from "../components/Card";
-import FormGroup from "../components/FormGroup";
 import { mensagemSucesso, mensagemErro } from "../components/toastr";
-  
+import FormGroup from "../components/FormGroup";
+import LoadingOverlay from "../LoadingOverlay";
 
-import LoadingOverlay from 'react-loading-overlay';
+import "../custom.css";
 import axios from "axios";
 import { BASE_URL } from "../config/axios";
 
@@ -16,7 +17,7 @@ function CadastroDescarte() {
   const navigate = useNavigate();
   const baseURL = `${BASE_URL}/compras`;
 
-  const [descartes, setDescartes] = useState([]); 
+  const [descartes, setDescartes] = useState([]);
 
   const [quantidadeDescarte, setQuantidadeDescarte] = useState("");
   const [quantidadeDisponivel, setQuantidadeDisponivel] = useState("");
