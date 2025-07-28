@@ -9,26 +9,42 @@ import EditIcon from '@mui/icons-material/Edit';
 import axios from 'axios';
 import { BASE_URL } from '../config/axios';
 
-const descarteURL = `${BASE_URL}/descarte`;
 
 function ListagemDescarte() {
   const navigate = useNavigate();
-
   const [descartes, setDescartes] = useState([]);
+
+  useEffect(() => {
+      carregarDescartes();
+    }, []);
 
   const carregarDescartes = async () => {
     try {
-      const response = await axios.get(descarteURL);
-      setDescartes(response.data);
-    } catch (error) {
-      console.error('Erro ao carregar descartes:', error);
-      mensagemErro('Erro ao carregar descartes.');
-    }
-  };
+      const [resDescartes, resEstoques] = await Promise.all([
+        axios.get(`${BASE_URL}/descartes`),
+        axios.get(`${BASE_URL}/estoques`),
+      ]);
+    
+    const mapaDescartes = resDescartes.data.reduce((map, descarte) => {
+      map[descarte.id] = descarte.id;
+      return map;
+    }, {});
 
-  useEffect(() => {
-    carregarDescartes();
-  }, []);
+    const mapaEstoques = resEstoques.data.reduce((map, estoque) => {
+      map[estoque.id] = estoque.nome;
+      return map;
+    }, {});
+
+    const descartesComNomes = resDescartes.data.map((descarte) => ({
+          ...descarte,
+          nomeEstoque: descarte.estoqueId ? mapaEstoques[descarte.estoqueId] : "Não encontrado",
+        }));
+    
+        setDescartes(descartesComNomes);
+      } catch (error) {
+        mensagemErro('Erro ao carregar dados dos descartes ou estoques.');
+      }
+  };
 
   const redirecionarCadastro = () => {
     navigate('/CadastroDescarte');
@@ -39,18 +55,21 @@ function ListagemDescarte() {
   };
 
   const excluirDescarte = async (id) => {
-    try {
-      await axios.delete(`${descarteURL}/${id}`);
-      mensagemSucesso('Descarte excluído com sucesso!');
-      setDescartes((prev) => prev.filter((d) => d.id !== id));
-    } catch (error) {
-      mensagemErro('Erro ao excluir o descarte.');
-    }
-  };
+  if (!window.confirm("Tem certeza que deseja excluir este descarte?")) return;
+
+  try {
+    await axios.delete(`${BASE_URL}/descartes/${id}`);
+    mensagemSucesso('Descarte excluído com sucesso!');
+    setDescartes((prev) => prev.filter((descarte) => descarte.id !== id));
+  } catch (error) {
+    console.error("Erro ao excluir descarte:", error);
+    mensagemErro(error?.response?.data?.message || 'Erro ao excluir descarte.');
+  }
+};
 
   return (
     <div className="container">
-      <Card title="Listagem de Descartes">
+      <Card title="Descartes Cadastrados">
         <div className="row">
           <div className="col-lg-12">
             <div className="bs-component">
@@ -64,20 +83,18 @@ function ListagemDescarte() {
               <table className="table table-hover">
                 <thead>
                   <tr>
-                    <th>Quantidade</th>
-                    <th>Data</th>
-                    <th>Motivo</th>
-                    <th>Estoque ID</th>
+                    <th>Para descarte:</th>
+                    <th>Quantidade disponível</th>
+                    <th>Quantidade a ser descartada</th>                   
                     <th>Ações</th>
                   </tr>
                 </thead>
                 <tbody>
                   {descartes.map((descarte) => (
-                    <tr key={descarte.id}>
-                      <td>{descarte.quantidade_descarte}</td>
-                      <td>{descarte.data || '-'}</td>
-                      <td>{descarte.motivo || '-'}</td>
-                      <td>{descarte.estoque_id}</td>
+                    <tr key={descarte.id}> 
+                    <td>{descarte.nome}</td>
+                    <td>{descarte.quantidadeDisponivel}</td>                       
+                      <td>{descarte.quantidadeDescartes}</td>                                        
                       <td>
                         <Stack spacing={1} padding={0} direction="row">
                           <IconButton onClick={() => redirecionarEdicao(descarte.id)}>
