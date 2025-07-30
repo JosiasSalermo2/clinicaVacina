@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Card from '../components/Card';
 import { mensagemSucesso, mensagemErro } from '../components/toastr';
 
@@ -14,101 +14,99 @@ import EditIcon from '@mui/icons-material/Edit';
 import axios from 'axios';
 import { BASE_URL } from '../config/axios';
 
-const baseURL = `${BASE_URL}/fabricantes`;
-
 
 function ListagemFabricantes() {
   const navigate = useNavigate();
+  const [fabricantes, setFabricantes] = useState([]);
 
+  useEffect(() => {
+      carregarDados();
+    }, []);
 
-  const cadastrar = () => {
-    navigate(`/CadastroFabricante`);
+    const carregarDados = async () => {
+  try {
+    const [resFabricantes] = await Promise.all([
+      axios.get(`${BASE_URL}/fabricantes`),
+    ]);
+
+    const fabricantesComNomes = resFabricantes.data.map((fabricantes) => ({
+      ...fabricantes,
+    }));
+
+    setFabricantes(fabricantesComNomes);
+  } catch (error) {
+    mensagemErro('Erro ao carregar dados dos fabricantes.');
+  }
+};
+
+  const redirecionarCadastro = () => {
+    navigate('/CadastroFabricante');
   };
 
-  const editar = (id) => {
+  const redirecionarEdicao = (id) => {
     navigate(`/CadastroFabricante/${id}`);
   };
 
-  const [dados, setDados] = React.useState(null);
-
-  async function excluir(id) {
-    let data = JSON.stringify({ id });
-    let url = `${baseURL}/${id}`;
-    console.log(url);
-    await axios
-      .delete(url, data, {
-        headers: { 'Content-Type': 'application/json' },
-      })
-      .then(function (response) {
-        mensagemSucesso(`Fabricante excluído com sucesso!`);
-        setDados(
-          dados.filter((dado) => {
-            return dado.id !== id;
-          })
-        );
-      })
-      .catch(function (error) {
-        mensagemErro(`Erro ao excluir o fabricante`);
-      });
-  }
-
-  React.useEffect(() => {
-    axios.get(baseURL).then((response) => {
-      setDados(response.data);
-    });
-  }, []);
-
-  if (!dados) return null;
+  const excluirFabricante = async (id) => {
+    try {
+      await axios.delete(`${BASE_URL}/fabricantes/${id}`);
+      mensagemSucesso('Fabricante excluído com sucesso!');
+      setFabricantes((prev) => prev.filter((fabricante) => fabricante.id !== id));
+    } catch (error) {
+      mensagemErro('Erro ao excluir fabricante.');
+    }
+  };
 
   return (
-    <div className='container'>
-      <Card title='Fabricantes'>
-        <div className='row'>
-          <div className='col-lg-12'>
-            <div className='bs-component'>
+    <div className="container">
+      <Card title="Fabricantes Cadastrados">
+        <div className="row">
+          <div className="col-lg-12">
+            <div className="bs-component">
               <button
-                type='button'
-                className='btn btn-warning'
-                onClick={() => cadastrar()}
+                type="button"
+                className="btn btn-warning mb-3"
+                onClick={redirecionarCadastro}
               >
                 Novo Fabricante
               </button>
-              <table className='table table-hover'>
+              <table className="table table-hover">
                 <thead>
                   <tr>
-                    <th scope='col'>Nome</th>
-                    <th scope='col'>Vacina Ofertada</th>
-                    <th scope='col'>Telefone</th>
-                    <th scope='col'>email</th>
+                    <th>Fabricante</th>
+                    <th>E-mail</th>
+                    <th>CNPJ</th>
+                    <th>Razão Social</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {dados.map((dado) => (
-                    <tr key={dado.id}>
-                      <td>{dado.nomeFabricante}</td>
-                      <td>{dado.nomeVacina}</td>
-                      <td>{dado.telefone}</td>
-                      <td>{dado.email}</td>
+                  {fabricantes.map((fabricante) => (
+                    <tr key={fabricante.id}>
+                      <td>{fabricante.nomeFantasia}</td>
+                      <td>{fabricante.email}</td>
+                      <td>{fabricante.cnpj}</td>
+                      <td>{fabricante.razaoSocial}</td>
                       <td>
-                        <Stack spacing={1} padding={0} direction='row'>
+                        <Stack spacing={1} padding={0} direction="row">
                           <IconButton
-                            aria-label='edit'
-                            onClick={() => editar(dado.id)}
+                            onClick={() => redirecionarEdicao(fabricante.id)}
                           >
                             <EditIcon />
                           </IconButton>
-                          <IconButton
-                            aria-label='delete'
-                            onClick={() => excluir(dado.id)}
-                          >
+                          <IconButton onClick={() => excluirFabricante(fabricante.id)}>
                             <DeleteIcon />
                           </IconButton>
                         </Stack>
                       </td>
                     </tr>
                   ))}
+                  {fabricantes.length === 0 && (
+                    <tr>
+                      <td colSpan="4">Nenhum fabricante encontrado.</td>
+                    </tr>
+                  )}
                 </tbody>
-              </table>{' '}
+              </table>
             </div>
           </div>
         </div>
