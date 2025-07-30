@@ -69,8 +69,6 @@ function ListagemLotes() {
   };
 
   const excluirLote = async (id) => {
-  if (!window.confirm("Tem certeza que deseja excluir este lote?")) return;
-
   try {
     await axios.delete(`${BASE_URL}/lotes/${id}`);
     mensagemSucesso('Lote excluído com sucesso!');
