@@ -51,6 +51,14 @@ async function salvar() {
    novosErros.numeroLote = "O número do lote é obrigatório.";
  }
 
+ if (!numeroAmpola && numeroAmpola !== 0) {
+   novosErros.numeroAmpola = "O número da ampola é obrigatório.";
+ }
+
+ if (!dosesAmpola && dosesAmpola !== 0) {
+   novosErros.dosesAmpola = "A dose da ampola é obrigatória.";
+ }
+
   if (!compraId) {
     novosErros.compraId = "O número da compra é obrigatório.";
   }
@@ -63,29 +71,15 @@ async function salvar() {
     novosErros.estoqueId = "O estoque é obrigatório.";
   }
 
-  console.log("Valores enviados:", {
-  dataValidade,
-  numeroLote,
-  numeroAmpola,
-  dosesAmpola,
-  compraId,
-  vacinaId,
-  estoqueId
-});
-
-
   setErros(novosErros);
   if (Object.keys(novosErros).length > 0) {
     mensagemErro("Preencha todos os campos obrigatórios corretamente.");
     return;
   }
 
-  console.log("Erros detectados:", novosErros);
-
-
   const data = {
-    dataValidade,
     numeroLote,
+    dataValidade,
     numeroAmpola,
     dosesAmpola,
     compraId: parseInt(compraId, 10),
@@ -98,15 +92,21 @@ async function salvar() {
     if (!idParam) {
       await axios.post(baseURL, data);
       mensagemSucesso(`Lote ${numeroLote} cadastrado com sucesso!`);
+      setNumeroLote("");
+      setDataValidade("");
+      setNumeroAmpola("");
+      setDosesAmpola("");
+      setCompraId("");
+      setVacinaId("");
+      setEstoqueId("");
+      setErros({});
     } else {
       await axios.put(`${baseURL}/${idParam}`, data);
       mensagemSucesso(`Lote ${numeroLote} alterado com sucesso!`);
       navigate(`/ListagemLotes`);
     }
   } catch (error) {
-    console.error("Erro ao salvar:", error);
     mensagemErro(error?.response?.data?.message || "Erro ao salvar o lote.");
-
   }
 }
 
@@ -115,9 +115,13 @@ async function salvar() {
     try {
       const response = await axios.get(`${baseURL}/${idParam}`);
       setId(response.data.id);
-      setDataValidade(response.data.dataValidade);
       setNumeroLote(response.data.numeroLote);
+      setDataValidade(response.data.dataValidade);
+      setNumeroAmpola(response.data.numeroAmpola);
       setDosesAmpola(response.data.dosesAmpola);
+      setCompraId(response.data.compraId);
+      setVacinaId(response.data.vacinaId);
+      setEstoqueId(response.data.estoqueId);
     } catch (error) {
       console.error("Erro ao buscar os dados:", error);
       mensagemErro("Erro ao buscar os dados");
@@ -203,7 +207,9 @@ async function salvar() {
                     type="number"
                     id="inputNumeroAmpola"
                     value={numeroAmpola}
-                    className="form-control"
+                    className={`form-control ${
+                      erros.numeroAmpola ? "is-invalid" : ""
+                    }`}
                     onChange={(e) => setNumeroAmpola(e.target.value)}
                     min="0"
                   />
@@ -217,7 +223,9 @@ async function salvar() {
                     type="number"
                     id="inputDosesAmpola"
                     value={dosesAmpola}
-                    className="form-control"
+                    className={`form-control ${
+                      erros.dosesAmpola ? "is-invalid" : ""
+                    }`}
                     onChange={(e) => setDosesAmpola(e.target.value)}
                     min="0"
                   />
@@ -232,7 +240,7 @@ async function salvar() {
                     value={compraId}
                     onChange={(e) => setCompraId(e.target.value)}
                     className={`form-control ${
-                      erros.numeroCompra ? "is-invalid" : ""
+                      erros.compraId ? "is-invalid" : ""
                     }`}
                   >
                     <option value="">Selecione</option>
@@ -299,7 +307,7 @@ async function salvar() {
                   Salvar
                 </button>
                 <button
-                  onClick={() => navigate("/ListagemEstoques")}
+                  onClick={() => navigate("/ListagemLotes")}
                   type="button"
                   className="btn btn-danger"
                 >
