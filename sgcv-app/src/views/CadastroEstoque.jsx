@@ -29,11 +29,18 @@ function CadastroEstoque() {
   const [loading, setLoading] = useState(true);
   const [erros, setErros] = useState({});
 
+  // — IDs de relacionamento
+  const [fabricanteId, setFabricanteId] = useState('');
+
+  // — Listas para selects (sempre arrays)
+  const [fabricantes, setFabricantes] = useState([]);
+
+
 async function salvar() {
   const novosErros = {};
 
   if (!nome || !nome.trim()) {
-    novosErros.nome = "O nome do produto é obrigatório.";
+    novosErros.nome = "O nome do estoque é obrigatório.";
   }
 
   if (!quantidadeDisponivel || isNaN(quantidadeDisponivel)) {
@@ -52,9 +59,9 @@ async function salvar() {
     novosErros.pontoRessuprimento = "Ponto de ressuprimento é obrigatório.";
   }
 
-  if (!nomeFabricante || !nomeFabricante.trim()) {
-    novosErros.nomeFabricante = "O nome do fabricante é obrigatório.";
-  }
+  if (!fabricanteId) {
+      novosErros.fabricanteId = "Selecione o fabricante.";
+    }
 
   setErros(novosErros);
   if (Object.keys(novosErros).length > 0) {
@@ -68,23 +75,52 @@ async function salvar() {
     quantidadeMinima,
     quantidadeMaxima,
     pontoRessuprimento,
-    nomeFabricante,
+    fabricanteId: parseInt(fabricanteId),
   };
   if (idParam) data.id = id;
 
   try {
     if (!idParam) {
       await axios.post(baseURL, data);
-      mensagemSucesso(`Produto ${nome} cadastrado com sucesso!`);
+      mensagemSucesso(`Estoque de ${nome} cadastrado com sucesso!`);
+      setNome("");
+      setQuantidadeDisponivel("");
+      setQuantidadeMinima("");
+      setQuantidadeMaxima("");
+      setPontoRessuprimento("");
+      setFabricanteId("");
+      setErros({});
     } else {
       await axios.put(`${baseURL}/${idParam}`, data);
-      mensagemSucesso(`Produto ${nome} alterado com sucesso!`);
+      mensagemSucesso(`Estoque de ${nome} alterado com sucesso!`);
       navigate(`/ListagemEstoques`);
     }
   } catch (error) {
-    mensagemErro(error?.response?.data || "Erro ao salvar produto.");
+    mensagemErro(error?.response?.data || "Erro ao salvar o estoque.");
   }
 }
+
+// - Fabricantes 
+  useEffect(() => {
+  async function carregarFabricantes() {
+    try {
+      const response = await axios.get(`${BASE_URL}/fabricantes`);
+      setFabricantes(response.data);
+    } catch (error) {
+      mensagemErro("Erro ao carregar fabricantes.");
+    }
+  }
+
+  carregarFabricantes();
+
+  if (idParam) {
+    buscar();
+  } else {
+    setLoading(false);
+  }
+}, [idParam]);
+
+
 
 
   async function buscar() {
@@ -96,7 +132,7 @@ async function salvar() {
       setQuantidadeMinima(response.data.quantidadeMinima);
       setQuantidadeMaxima(response.data.quantidadeMaxima);
       setPontoRessuprimento(response.data.pontoRessuprimento);
-      setNomeFabricante(response.data.nomeFabricante);
+      setFabricanteId(response.data.fabricanteId);
     } catch (error) {
       console.error("Erro ao buscar os dados:", error);
       mensagemErro("Erro ao buscar os dados");
@@ -122,14 +158,12 @@ async function salvar() {
             <div className="form-row">
               <div className="mesmaLinha">
                 <div className="col-md-12 mb-3">
-                  <FormGroup label="Nome do Produto: *" htmlFor="inputNome">
+                  <FormGroup label="Nome do estoque: *" htmlFor="inputNome">
                     <input
                       type="text"
                       id="inputNome"
                       value={nome}
-                      className={`form-control ${
-                        erros.nome ? "is-invalid" : ""
-                      }`}
+                      className={`form-control ${erros.nome ? "is-invalid" : ""}`}
                       onChange={(e) => setNome(e.target.value)}
                     />
                     {erros.nome && (
@@ -148,7 +182,7 @@ async function salvar() {
                     type="number"
                     id="inputQuantidadeDisponivel"
                     value={quantidadeDisponivel}
-                    className="form-control"
+                    className={`form-control ${erros.quantidadeDisponivel ? "is-invalid" : ""}`}
                     onChange={(e) => setQuantidadeDisponivel(e.target.value)}
                     min="0"
                   />
@@ -167,7 +201,7 @@ async function salvar() {
                     type="number"
                     id="inputQuantidadeMinima"
                     value={quantidadeMinima}
-                    className="form-control"
+                    className={`form-control ${erros.quantidadeMinima ? "is-invalid" : ""}`}
                     onChange={(e) => setQuantidadeMinima(e.target.value)}
                     min="0"
                   />
@@ -186,7 +220,7 @@ async function salvar() {
                     type="number"
                     id="inputQuantidadeMaxima"
                     value={quantidadeMaxima}
-                    className="form-control"
+                    className={`form-control ${erros.quantidadeMaxima ? "is-invalid" : ""}`}
                     onChange={(e) => setQuantidadeMaxima(e.target.value)}
                     min="0"
                   />
@@ -205,7 +239,7 @@ async function salvar() {
                     type="number"
                     id="inputPontoRessuprimento"
                     value={pontoRessuprimento}
-                    className="form-control"
+                    className={`form-control ${erros.pontoRessuprimento ? "is-invalid" : ""}`}
                     onChange={(e) => setPontoRessuprimento(e.target.value)}
                     min="0"
                   />
@@ -216,24 +250,23 @@ async function salvar() {
                   )}
                 </FormGroup>
 
-                <FormGroup
-                  label="Nome do Fabricante: *"
-                  htmlFor="inputNomeFabricante"
+                <FormGroup label="Fabricante: *" htmlFor="selectFabricante">
+                <select
+                  className={`form-select ${erros.fabricanteId ? 'is-invalid' : ''}`}
+                  id="selectFabricante"
+                  value={fabricanteId}
+                  onChange={e => setFabricanteId(e.target.value)}
                 >
-                  <textarea
-                    id="inputNomeFabricante"
-                    value={nomeFabricante}
-                    className="form-control col-md-6"
-                    onChange={(e) => setNomeFabricante(e.target.value)}
-                    rows={2}
-                    style={{ resize: "none" }}
-                  />
-                  {erros.nomeFabricante && (
-                    <div className="invalid-feedback">
-                      {erros.nomeFabricante}
-                    </div>
-                  )}
-                </FormGroup>
+                  <option value="">Selecione o Fabricante</option>
+                  {fabricantes.map(fab => (
+                    <option key={fab.id} value={fab.id}>
+                      {fab.nomeFantasia}
+                    </option>
+                  ))}
+                </select>
+                {erros.fabricanteId && <div className="invalid-feedback">{erros.fabricanteId}</div>}
+
+              </FormGroup>
               </div>
 
               <Stack spacing={1} padding={1} direction="row">
