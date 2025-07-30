@@ -55,7 +55,7 @@ function ListagemEstoques() {
 
   const excluirEstoque = async (id) => {
     try {
-      await axios.delete(`${BASE_URL}/${id}`);
+      await axios.delete(`${BASE_URL}/estoques/${id}`);
       mensagemSucesso('Estoque excluído com sucesso!');
       setEstoques((prev) => prev.filter((estoque) => estoque.id !== id));
     } catch (error) {
@@ -79,7 +79,7 @@ function ListagemEstoques() {
               <table className="table table-hover">
                 <thead>
                   <tr>
-                    <th>Estoque do produto</th>
+                    <th>Estoque</th>
                     <th>Quantidade disponível</th>
                     <th>Quantidade mínima</th>
                     <th>Quantidade máxima</th>
@@ -115,7 +115,7 @@ function ListagemEstoques() {
                   ))}
                   {estoques.length === 0 && (
                     <tr>
-                      <td colSpan="4">Nenhum lote encontrado.</td>
+                      <td colSpan="7">Nenhum estoque encontrado.</td>
                     </tr>
                   )}
                 </tbody>
