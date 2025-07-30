@@ -15,35 +15,19 @@ import { BASE_URL } from "../config/axios";
 function CadastroDescarte() {
   const { idParam } = useParams();
   const navigate = useNavigate();
-  const baseURL = `${BASE_URL}/compras`;
+  const baseURL = `${BASE_URL}/descartes`;
 
-  const [descartes, setDescartes] = useState([]);
-
+  const[id, setId] = useState('');
   const [quantidadeDescarte, setQuantidadeDescarte] = useState("");
   const [quantidadeDisponivel, setQuantidadeDisponivel] = useState("");
   const [nomeDescarte, setNomeDescarte] = useState("");
-
-  const [estoqueId, setEstoqueId] = useState("");
-
-  const [estoque, setEstoques] = useState([]);
-
   const [loading, setLoading] = useState(true);
-
   const [erros, setErros] = useState({});
 
-  const buscarDescarte = async () => {
-    try {
-      const response = await axios.get(`${BASE_URL}/${idParam}`);
-      const descarte = response.data;
-      setQuantidadeDescarte(descarte.quantidadeDescarte);
-      setNomeDescarte(descarte.nomeDescarte);
-    } catch (error) {
-      console.error("Erro ao buscar descarte.", error);
-      mensagemErro("Erro ao buscar descarte.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // — IDs de relacionamento
+  const [estoqueId, setEstoqueId] = useState("");
+  // — Listas para selects (sempre arrays)
+  const [estoques, setEstoques] = useState([]);
 
   async function salvar() {
     const novosErros = {};
@@ -51,36 +35,44 @@ function CadastroDescarte() {
       novosErros.quantidadeDescarte = "Informe a quantidade a ser descartada.";
     }
 
-    setErros(novosErros);
+    if (!quantidadeDisponivel || isNaN(parseInt(quantidadeDisponivel))) {
+      novosErros.quantidadeDisponivel = "Informe a quantidade a disponível.";
+    }
 
+    if (!estoqueId) {
+      novosErros.estoqueId = "Selecione o estoque.";
+    }
+
+    setErros(novosErros);
     if (Object.keys(novosErros).length > 0) {
       mensagemErro("Preencha todos os campos obrigatórios corretamente.");
       return;
     }
 
     const data = {
-      quantidadeDescarte: parseInt(quantidadeDescarte),
+      quantidadeDescarte,
+      quantidadeDisponivel,
+      estoqueId: parseInt(estoqueId),
     };
+    if (idParam) data.id = id;
 
     try {
       if (!idParam) {
-        await axios.post(baseURL, data, {
-          headers: { "Content-Type": "application/json" },
-        });
+        await axios.post(baseURL, data);
         mensagemSucesso(`Descarte cadastrado com sucesso!`);
+        setQuantidadeDescarte("");
+        setQuantidadeDisponivel("");
+        setEstoqueId("");
+        setErros({});
       } else {
-        await axios.put(`${baseURL}/${idParam}`, data, {
-          headers: { "Content-Type": "application/json" },
-        });
-        mensagemSucesso(`Descarte ${idParam} alterado com sucesso!`);
+        await axios.put(`${baseURL}/${idParam}`, data);
+        mensagemSucesso("Descarte alterado com sucesso.");
+        navigate("/ListagemDescarte");
       }
-
-      navigate("/ListagemDescarte");
     } catch (error) {
-      console.error("Erro ao salvar descarte.", error);
-      mensagemErro("Erro ao salvar os dados");
+      mensagemErro(error?.response?.data || "Erro ao salvar o descarte.");
     }
-  }
+}
 
   function inicializar() {
     if (idParam == null) {
@@ -91,29 +83,32 @@ function CadastroDescarte() {
     }
   }
 
-  useEffect(() => {
-    async function carregarDescartes() {
-      try {
-        const response = await axios.get(baseURL);
-        setDescartes(response.data);
-      } catch (error) {
-        mensagemErro("Erro ao carregar lista de descartes.");
-      }
-    }
-    carregarDescartes();
-  }, []);
-
+  //Estoques
   useEffect(() => {
     async function carregarEstoques() {
       try {
         const response = await axios.get(`${BASE_URL}/estoques`);
         setEstoques(response.data);
       } catch (error) {
-        mensagemErro("Erro ao carregar estoques.");
+        mensagemErro("Erro ao carregar lista de estoques.");
       }
     }
     carregarEstoques();
   }, []);
+
+    const buscarDescarte = async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}/${idParam}`);
+      const descarte = response.data;
+      setQuantidadeDescarte(descarte.quantidadeDescarte);
+      setQuantidadeDisponivel(descarte.quantidadeDisponivel);
+      setEstoqueId(response.data.estoqueId);
+    } catch (error) {
+      mensagemErro("Erro ao buscar descarte.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (idParam) {
@@ -174,20 +169,19 @@ function CadastroDescarte() {
 
           <div className="row">
             <div className="col-md-12 mb-3">
-              <FormGroup label="Vacina de: *" htmlFor="selectEstoque">
+              <FormGroup label="Estoque de: *" htmlFor="selectEstoque">
                 <select
                   id="selectEstoque"
-                  className={`form-select ${
-                    erros.estoqueId ? "is-invalid" : ""
+                  className={`form-select ${erros.estoqueId ? "is-invalid" : ""
                   }`}
                   value={estoqueId}
                   onChange={(e) => setEstoqueId(e.target.value)}
                   required
                 >
-                  <option value=""></option>
-                  {estoque.map((estoque) => (
+                  <option value="">Selecione o estoque</option>
+                  {estoques.map((estoque) => (
                     <option key={estoque.id} value={estoque.id}>
-                      {`${estoque.nome} - Val.: ${estoque.nome}`}
+                      {`${estoque.nome}`}
                     </option>
                   ))}
                 </select>
