@@ -53,6 +53,7 @@ function CadastroAgendamento() {
   }, []);
 
   // 🔄 BUSCAR AGENDAMENTO PARA EDIÇÃO
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (idParam) {
       buscar();
@@ -118,6 +119,14 @@ function CadastroAgendamento() {
       if (!idParam) {
         await axios.post(baseURL, data);
         mensagemSucesso(`Agendamento cadastrado com sucesso!`);
+        setDataAgendamento("");
+        setHorarioAgendamento("");
+        setPacienteId(null);
+        setVacinaId(null);
+        setDescricao("");
+        setInputValue("");
+        setVacinaInputValue("");
+        setErros({});
       } else {
         await axios.put(`${baseURL}/${idParam}`, data);
         mensagemSucesso(`Agendamento atualizado com sucesso!`);
@@ -260,7 +269,7 @@ function CadastroAgendamento() {
                       renderInput={(params) => (
                         <TextField
                           {...params}
-                          placeholder="Digite o nome da vacina"
+                          placeholder=""
                           error={!!erros.vacinaId}
                           helperText={erros.vacinaId}
                         />
