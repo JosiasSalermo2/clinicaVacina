@@ -48,7 +48,7 @@ function ListagemFornecedores() {
 
   const excluirFornecedor = async (id) => {
     try {
-      await axios.delete(`${BASE_URL}/${id}`);
+      await axios.delete(`${BASE_URL}/fornecedores/${id}`);
       mensagemSucesso('Fornecedor excluído com sucesso!');
       setFornecedores((prev) => prev.filter((fornecedor) => fornecedor.id !== id));
     } catch (error) {
