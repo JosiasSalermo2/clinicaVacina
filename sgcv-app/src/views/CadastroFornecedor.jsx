@@ -20,7 +20,7 @@ function CadastroFornecedor() {
   const baseURL = `${BASE_URL}/fornecedores`;
 
   const [id, setId] = useState("");
-  const [nomeFornecedor, setNomeFornecedor] = useState("");
+  const [nomeFantasia, setNomeFantasia] = useState("");
   const [email, setEmail] = useState("");
   const [cnpj, setCnpj] = useState("");
   const [razaoSocial, setRazaoSocial] = useState("");
@@ -30,12 +30,16 @@ function CadastroFornecedor() {
 async function salvar() {
   const novosErros = {};
 
-  if (!nomeFornecedor || !nomeFornecedor.trim()) {
-    novosErros.nomeFornecedor = "O nome do fornecedor é obrigatória.";
+  if (!nomeFantasia || !nomeFantasia.trim()) {
+    novosErros.nomeFantasia = "O nome do fornecedor é obrigatório.";
   }
 
   if (!email || !email.trim()) {
     novosErros.email = "O e-mail do fornecedor é obrigatório.";
+  }
+
+  if (!cnpj || !cnpj.trim()) {
+    novosErros.cnpj = "O CNPJ do fornecedor é obrigatório.";
   }
 
   setErros(novosErros);
@@ -45,7 +49,7 @@ async function salvar() {
   }
 
   const data = {
-    nomeFornecedor,
+    nomeFantasia: nomeFantasia,
     email,
     cnpj,
     razaoSocial,
@@ -55,10 +59,15 @@ async function salvar() {
   try {
     if (!idParam) {
       await axios.post(baseURL, data);
-      mensagemSucesso(`Fornecedor ${nomeFornecedor} cadastrado com sucesso!`);
+      mensagemSucesso(`Fornecedor ${nomeFantasia} cadastrado com sucesso!`);
+      setNomeFantasia("");
+      setEmail("");
+      setCnpj("");
+      setRazaoSocial("");
+      setErros({});
     } else {
       await axios.put(`${baseURL}/${idParam}`, data);
-      mensagemSucesso(`Fornecedor ${nomeFornecedor} alterado com sucesso!`);
+      mensagemSucesso(`Fornecedor ${nomeFantasia} alterado com sucesso!`);
       navigate(`/ListagemFornecedores`);
     }
   } catch (error) {
@@ -71,7 +80,7 @@ async function salvar() {
     try {
       const response = await axios.get(`${baseURL}/${idParam}`);
       setId(response.data.id);
-      setNomeFornecedor(response.data.nomeFornecedor);
+      setNomeFantasia(response.data.nomeFantasia);
       setEmail(response.data.email);
       setCnpj(response.data.cnpj);
       setRazaoSocial(response.data.razaoSocial);
@@ -107,14 +116,12 @@ async function salvar() {
                     <input
                       type="text"
                       id="inputFornecedor"
-                      value={nomeFornecedor}
-                      className={`form-control ${
-                        erros.numeroLote ? "is-invalid" : ""
-                      }`}
-                      onChange={(e) => setNomeFornecedor(e.target.value)}
+                      value={nomeFantasia}
+                      className={`form-control ${erros.numeroLote ? "is-invalid" : ""}`}
+                      onChange={(e) => setNomeFantasia(e.target.value)}
                     />
-                    {erros.numeroLote && (
-                      <div className="invalid-feedback">{erros.nomeFornecedor}</div>
+                    {erros.nomeFantasia && (
+                      <div className="invalid-feedback">{erros.nomeFantasia}</div>
                     )}
                   </FormGroup>
                 </div>
@@ -141,7 +148,7 @@ async function salvar() {
                     type="text"
                     id="inputCnpj"
                     value={cnpj}
-                    className="form-control"
+                    className={`form-control ${erros.cnpj ? "is-invalid" : ""}`}
                     onChange={(e) => setCnpj(e.target.value)}
                   />
                   {erros.cnpj && (
@@ -173,7 +180,7 @@ async function salvar() {
                   Salvar
                 </button>
                 <button
-                  onClick={() => navigate("/ListagemEstoques")}
+                  onClick={() => navigate("/ListagemFornecedores")}
                   type="button"
                   className="btn btn-danger"
                 >
