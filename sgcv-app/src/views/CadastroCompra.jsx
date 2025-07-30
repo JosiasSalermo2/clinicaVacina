@@ -54,6 +54,7 @@ function CadastroCompra() {
       setId(compra.id);
       setValor(compra.valor);
       setDataCompra(compra.dataCompra);
+      setQuantidadeVacina(compra.quantidadeVacina);
       setFornecedorId(compra.fornecedorId);
       setFabricanteId(compra.fabricanteId);
       setVacinaId(compra.vacinaId);
@@ -78,6 +79,10 @@ function CadastroCompra() {
       novosErros.dataCompra = "Informe a data da compra.";
     }
 
+    if (!quantidadeVacina){
+      novosErros.quantidadeVacina = "Informe a quantidade de vacina.";
+    }
+
     if (!fabricanteId) {
       novosErros.fabricanteId = "Selecione o fabricante.";
     }
@@ -100,6 +105,7 @@ function CadastroCompra() {
     const data = {
       valor: parseFloat(valor),
       dataCompra,
+      quantidadeVacina,
       fornecedorId: parseInt(fornecedorId),
       fabricanteId: parseInt(fabricanteId),
       vacinaId: parseInt(vacinaId),
@@ -131,6 +137,7 @@ function CadastroCompra() {
       setId('');
       setValor('');
       setDataCompra('');
+      setQuantidadeVacina('');
       setFornecedorId('');
       setFabricanteId('');
       setVacinaId('');
@@ -274,7 +281,7 @@ function CadastroCompra() {
                   name="quantidadeVacina"
                   onChange={e => setQuantidadeVacina(e.target.value)}
                 />
-                {erros.quantidadeVacinaa && (
+                {erros.quantidadeVacina && (
                   <div className="invalid-feedback">{erros.quantidadeVacina}</div>
                 )}
               </FormGroup>
