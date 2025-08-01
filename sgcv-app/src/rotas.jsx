@@ -34,6 +34,7 @@ import ListagemAgendamento from "./views/ListagemAgendamento";
 import ListagemEstoques from "./views/ListagemEstoques";
 import ListagemLotes from "./views/ListagemLotes";
 import ListagemFornecedores from "./views/ListagemFornecedores";
+import ListagemTiposVacinas from "./views/ListagemTiposVacinas";
 
 function Rotas() {
   const [loading, setLoading] = React.useState(true);
@@ -158,7 +159,10 @@ function Rotas() {
           path="/ListagemFornecedores"
           element={<ListagemFornecedores />}
         />
-
+        <Route
+          path="/ListagemTiposVacinas"
+          element={<ListagemTiposVacinas />}
+        />
         {/* REDIRECIONAMENTO */}
       </Routes>
     </BrowserRouter>
