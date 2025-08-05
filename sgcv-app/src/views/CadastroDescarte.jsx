@@ -118,6 +118,16 @@ function CadastroDescarte() {
     }
   }, [idParam]);
 
+  useEffect(() => {
+  if (estoqueId) {
+    const estoqueSelecionado = estoques.find(e => e.id === parseInt(estoqueId));
+    if (estoqueSelecionado) {
+      setQuantidadeDisponivel(estoqueSelecionado.quantidadeDisponivel); 
+    }
+  }
+}, [estoqueId, estoques]);
+
+
   if (loading) return <LoadingOverlay loading={true} />;
 
   return (
