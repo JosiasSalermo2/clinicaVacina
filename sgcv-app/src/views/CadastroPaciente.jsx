@@ -2,222 +2,178 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import Stack from "@mui/material/Stack";
+import TextField from "@mui/material/TextField";
+import Autocomplete from "@mui/material/Autocomplete";
 
 import Card from "../components/Card";
 import { mensagemSucesso, mensagemErro } from "../components/toastr";
 import FormGroup from "../components/FormGroup";
-
+import LoadingOverlay from "../LoadingOverlay";
 
 import "../custom.css";
-import LoadingOverlay from '../LoadingOverlay';
-
 import axios from "axios";
 import { BASE_URL } from "../config/axios";
 
 function CadastroPaciente() {
   const { idParam } = useParams();
-
   const navigate = useNavigate();
-
   const baseURL = `${BASE_URL}/pacientes`;
 
-  const [id, setId] = useState('');
-  const [nome, setNome] = useState('');
-  const [email, setEmail] = useState('');
-  const [cpf, setCpf] = useState('');
-  const [dataNasc, setDataNasc] = useState('');
-  const [ddd, setDdd] = useState('');
-  const [telefone, setTelefone] = useState('');
+  const [id, setId] = useState("");
+  const [nome, setNome] = useState("");
+  const [email, setEmail] = useState("");
+  const [cpf, setCpf] = useState("");
+  const [dataNasc, setDataNasc] = useState("");
+  const [ddd, setDdd] = useState("");
+  const [telefone, setTelefone] = useState("");
   const [fotoPerfil, setFotoPerfil] = useState();
-  const [logradouro, setLogradouro] = useState('');
-  const [numero, setNumero] = useState('');
-  const [complemento, setComplemento] = useState('');
-  const [cep, setCep] = useState('');
-  const [uf, setUf] = useState('');
+  const [logradouro, setLogradouro] = useState("");
+  const [numero, setNumero] = useState("");
+  const [complemento, setComplemento] = useState("");
+  const [cep, setCep] = useState("");
+  const [uf, setUf] = useState("");
   const [cidades, setCidades] = useState([]);
-  const [tipoSangue, setTipoSangue] = useState('');
-  const [contraIndicacao, setContraIndicacao] = useState('');
-
-
-
+  const [tipoSangue, setTipoSangue] = useState("");
+  const [contraIndicacao, setContraIndicacao] = useState("");
 
   const [loading, setLoading] = useState(true);
-
-  function inicializar() {
-    if (idParam == null) {
-      setId('');
-      setNome('');
-      setEmail('');
-      setCpf('');
-      setDataNasc('');
-      setDdd('');
-      setTelefone('');
-      setFotoPerfil('');
-      setLogradouro('');
-      setNumero('');
-      setComplemento('');
-      setCep('');
-      setUf('');
-      setCidades('');
-      setTipoSangue('');
-      setContraIndicacao('');
-      setContraIndicacao('');
-
-    } else if (dados) {
-      setId(dados.id);
-      setNome(dados.nome);
-      setEmail(dados.email);
-      setCpf(dados.cpf);
-      setDataNasc(dados.dataNasc);
-      setDdd(dados.ddd);
-      setTelefone(dados.telefone);
-      setFotoPerfil(dados.fotoPerfil);
-      setLogradouro(dados.logradouro);
-      setNumero(dados.numero);
-      setComplemento(dados.complemento);
-      setCep(dados.cep);
-      setUf(dados.uf);
-      setCidades(dados.cidades);
-      setTipoSangue(dados.tipoSangue);
-      setContraIndicacao(dados.contraIndicacao);
-
-    } else {
-      buscar();
-    }
-
-  }
-
-  async function salvar() {
-    let data = { id, nome, email, cpf, dataNasc, ddd, telefone, fotoPerfil, logradouro, numero, complemento, cep, uf, cidades, tipoSangue, contraIndicacao };
-    data = JSON.stringify(data);
-
-    if (idParam == null) {
-      await axios
-        .post(baseURL, data, {
-          headers: { 'Content-type': 'application/json' },
-        })
-        .then(function (response) {
-          mensagemSucesso(`Paciente ${nome} cadastrada com sucesso!`);
-          navigate(`/ListagemPacientes`);
-        })
-        .catch(function (error) {
-          mensagemErro(error.response.data);
-        });
-    } else {
-      await axios
-        .put(`${baseURL}/${idParam}`, data, {
-          headers: { 'Content-Type': 'application/json' },
-        })
-        .then(function (response) {
-          mensagemSucesso(`Paciente ${nome} alterada com sucesso!`);
-          navigate(`/ListagemPacientes`);
-        })
-        .catch(function (error) {
-          mensagemErro(error.response.data);
-        });
-    }
-  }
-
-  async function buscar() {
-    try {
-      const response = await axios.get(`${baseURL}/${idParam}`);
-      setDados(response.data);
-      setId(response.dados.id);
-      setNome(response.dados.nome);
-      setEmail(response.dados.email);
-      setCpf(response.dados.cpf);
-      setDataNasc(response.dados.dataNasc);
-      setDdd(response.dados.ddd);
-      setTelefone(response.dados.telefone);
-      setFotoPerfil(response.dados.fotoPerfil);
-      setLogradouro(response.dados.logradouro);
-      setNumero(response.dados.numero);
-      setComplemento(response.dados.complemento);
-      setCep(response.dados.cep);
-      setUf(response.dados.uf);
-      setCidades(response.dados.cidades);
-      setTipoSangue(response.dados.tipoSangue);
-      setContraIndicacao(response.dados.contraIndicacao);
-
-
-    } catch (error) {
-      console.error("Erro ao buscar os dados:", error);
-    }
-  }
+  const [erros, setErros] = useState({});
 
   useEffect(() => {
-    async function buscar() {
-      try {
-        const response = await axios.get(`${baseURL}/${idParam}`);
-        setDados(response.data);
-        setId(response.data.id);
-        setNome(response.data.nome);
-        setEmail(response.data.email);
-        setCpf(response.data.cpf);
-        setDataNasc(response.data.dataNasc);
-        setDdd(response.data.ddd);
-        setTelefone(response.data.telefone);
-        setFotoPerfil(response.data.fotoPerfil);
-        setLogradouro(response.data.logradouro);
-        setNumero(response.data.numero);
-        setComplemento(response.data.complemento);
-        setCep(response.data.cep);
-        setUf(response.data.uf);
-        setCidades(response.data.cidades);
-        setTipoSangue(response.data.tipoSangue);
-        setContraIndicacao(response.data.contraIndicacao);
-
-
-      } catch (error) {
-        console.error("Erro ao buscar os dados:", error);
-        mensagemErro("Erro ao buscar os dados");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-
     if (idParam) {
       buscar();
     } else {
       setLoading(false);
     }
-  }, [baseURL, idParam]);
+  }, [idParam]);
 
+  async function buscar() {
+    try {
+      const response = await axios.get(`${baseURL}/${idParam}`);
+      const paciente = response.data;
+      setNome(paciente.nome || "");
+      setEmail(paciente.email || "");
+      setCpf(paciente.cpf || "");
+      setDataNasc(paciente.dataNasc || "");
+      setDdd(paciente.ddd || "");
+      setTelefone(paciente.telefone || "");
+      setFotoPerfil(paciente.fotoPerfil || "");
+      setLogradouro(paciente.logradouro || "");
+      setNumero(paciente.numero || "");
+      setComplemento(paciente.complemento || "");
+      setCep(paciente.cep || "");
+      setUf(paciente.uf || "");
+      setCidades(paciente.cidades || "");
+      setTipoSangue(paciente.tipoSangue || "");
+      setContraIndicacao(paciente.contraIndicacao || "");
+    } catch (error) {
+      console.error("Erro ao buscar os dados:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
+  async function salvar() {
+    const novosErros = {};
 
-  const [dados, setDados] = useState([]);
-  useEffect(() => {
-    axios.get(`${BASE_URL}/pacientes`).then((response) => {
-      setDados(response.data);
-    });
-  }, []);
+    if (!String(nome || "").trim()) {
+      novosErros.nome = "O campo Nome é obrigatório.";
+    }
+    if (!String(email || "").trim()) {
+      novosErros.email = "O campo Email é obrigatório.";
+    }
+    if (!String(cpf || "").trim()) {
+      novosErros.cpf = "O campo CPF é obrigatório.";
+    }
+    if (!String(dataNasc || "").trim()) {
+      novosErros.dataNasc = "O campo Data de Nascimento é obrigatório.";
+    }
+    if (!String(ddd || "").trim()) {
+      novosErros.ddd = "O campo DDD é obrigatório.";
+    }
+    if (!String(telefone || "").trim()) {
+      novosErros.telefone = "O campo Telefone é obrigatório.";
+    }
+    if (!String(fotoPerfil || "").trim()) {
+      novosErros.fotoPerfil = "O campo Foto de Perfil é obrigatório.";
+    }
+    if (!String(logradouro || "").trim()) {
+      novosErros.logradouro = "O campo Logradouro é obrigatório.";
+    }
+    if (!String(numero || "").trim()) {
+      novosErros.numero = "O campo Número é obrigatório.";
+    }
+    if (!String(complemento || "").trim()) {
+      novosErros.complemento = "O campo Complemento é obrigatório.";
+    }
+    if (!String(cep || "").trim()) {
+      novosErros.cep = "O campo CEP é obrigatório.";
+    }
+    if (!String(uf || "").trim()) {
+      novosErros.uf = "O campo UF é obrigatório.";
+    }
+    if (!String(cidades || "").trim()) {
+      novosErros.cidades = "O campo Cidades é obrigatório.";
+    }
+    if (!String(tipoSangue || "").trim()) {
+      novosErros.tipoSangue = "O campo Tipo Sanguíneo é obrigatório.";
+    }
+    if (!String(contraIndicacao || "").trim()) {
+      novosErros.contraIndicacao = "O campo Contra Indicação é obrigatório.";
+    }
 
+    setErros(novosErros);
+    if (Object.keys(novosErros).length > 0) {
+      mensagemErro("Preencha todos os campos obrigatórios corretamente.");
+      return;
+    }
 
-  const [dados2, setDados2] = useState(null);
-  useEffect(() => {
-    axios.get(`${BASE_URL}/estados`).then((response) => {
-      setDados2(response.data);
-    });
-  }, []);
+    const data = {
+      nome,
+      email,
+      cpf,
+      dataNasc,
+      ddd,
+      telefone,
+      fotoPerfil,
+      logradouro,
+      numero,
+      complemento,
+      cep,
+      uf,
+      cidades,
+      tipoSangue,
+      contraIndicacao,
+    };
 
-  const [dados3, setDados3] = useState(null);
-  useEffect(() => {
-    axios.get(`${BASE_URL}/sangue`).then((response) => {
-      setDados3(response.data);
-    });
-  }, []);
-
-
-  useEffect(() => {
-    buscar();
-  }, [id]);
-
-
-  if (!dados) return null;
-  if (!dados2) return null;
-  if (!dados3) return null;
-
+    try {
+      if (!idParam) {
+        await axios.post(baseURL, data);
+        mensagemSucesso(`Paciente ${nome} cadastrado com sucesso!`);
+        setNome("");
+        setEmail("");
+        setCpf("");
+        setDataNasc("");
+        setDdd("");
+        setTelefone("");
+        setFotoPerfil("");
+        setLogradouro("");
+        setNumero("");
+        setComplemento("");
+        setCep("");
+        setUf("");
+        setCidades("");
+        setTipoSangue("");
+        setContraIndicacao("");
+      } else {
+        await axios.put(`${baseURL}/${idParam}`, data);
+        mensagemSucesso(`Paciente atualizado com sucesso!`);
+        navigate(`/ListagemPacientes`);
+      }
+    } catch (error) {
+      mensagemErro(error?.response?.data || "Erro ao salvar paciente.");
+    }
+  }
 
   return (
     <div className="container">
@@ -309,7 +265,10 @@ function CadastroPaciente() {
                   </FormGroup>
                 </div>
                 <div className="col-md-3 mb-3">
-                  <FormGroup label="Foto de perfil: " htmlFor="selectFotoPerfil">
+                  <FormGroup
+                    label="Foto de perfil: "
+                    htmlFor="selectFotoPerfil"
+                  >
                     <input
                       type="file"
                       id="selectFotoPerfil"
@@ -373,7 +332,7 @@ function CadastroPaciente() {
               </div>
 
               <div className="mesmaLinha mb-3">
-                <div className="col-md-5" >
+                <div className="col-md-5">
                   <FormGroup label="Estado: " htmlFor="inputEstado">
                     <select
                       className="form-select"
@@ -385,11 +344,11 @@ function CadastroPaciente() {
                       <option key="0" value="0">
                         Selecione o Estado
                       </option>
-                      {dados2.map((estados) => (
+                      {/* {dados2.map((estados) => (
                         <option key={estados.id} value={estados.uf}>
                           {estados.uf}
                         </option>
-                      ))}
+                      ))} */}
                     </select>
                   </FormGroup>
                 </div>
@@ -405,15 +364,15 @@ function CadastroPaciente() {
                       <option key="0" value="0">
                         Selecione a Cidade
                       </option>
-                      {dados2
+                      {/* {dados2
                         .filter((estados) => estados.uf === uf)
                         .map((estados) =>
                           estados.cidades.map((cidades) => (
                             <option key={cidades} value={cidades}>
                               {cidades}
                             </option>
-                          ))
-                        )}
+                          )),
+                        )} */}
                     </select>
                   </FormGroup>
                 </div>
@@ -421,7 +380,10 @@ function CadastroPaciente() {
 
               <div className="mesmaLinha">
                 <div className="col-md-5 mb-3">
-                  <FormGroup label="Tipo Sanguineo: " htmlFor="selecttipoSangue">
+                  <FormGroup
+                    label="Tipo Sanguineo: "
+                    htmlFor="selecttipoSangue"
+                  >
                     <select
                       className="form-select"
                       id="inputTipoSangue"
@@ -432,19 +394,20 @@ function CadastroPaciente() {
                       <option key="0" value="0">
                         Selecione o Tipo de Sangue
                       </option>
-                      {dados3.map((dado) => (
-                        <option key={dado.id} value={dado.id}
-                        >
+                      {/* {dados3.map((dado) => (
+                        <option key={dado.id} value={dado.id}>
                           {dado.tipoSangue}
                         </option>
-                      ))}
+                      ))} */}
                     </select>
                   </FormGroup>
                 </div>
 
-
                 <div className="col-md-5 mb-3">
-                  <FormGroup label="Contra Indicação: " htmlFor="selectContraIndicacao">
+                  <FormGroup
+                    label="Contra Indicação: "
+                    htmlFor="selectContraIndicacao"
+                  >
                     <textarea
                       cols={15}
                       rows={3}
@@ -468,7 +431,7 @@ function CadastroPaciente() {
                 Salvar
               </button>
               <button
-                onClick={inicializar}
+                onClick={() => navigate("/ListagemPacientes")}
                 type="button"
                 className="btn btn-danger"
               >
