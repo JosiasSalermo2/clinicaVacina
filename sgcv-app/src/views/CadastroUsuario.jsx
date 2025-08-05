@@ -22,6 +22,8 @@ function CadastroUsuario() {
   const [login, setLogin] = useState("");
   const [cpf, setCpf] = useState("");
   const [administrador, setAdministrador] = useState(false);
+  const [senha, setSenha] = useState("");
+  const [repetirSenha, setRepetirSenha] = useState("");
 
   const [loading, setLoading] = useState(true);
   const [erros, setErros] = useState({});
@@ -41,6 +43,8 @@ function CadastroUsuario() {
       setLogin(usuario.login || "");
       setCpf(usuario.cpf || "");
       setAdministrador(usuario.administrador || false);
+      setSenha(usuario.senha || "");
+      setRepetirSenha(usuario.senha || "");
     } catch (error) {
       console.error("Erro ao buscar os dados:", error);
       mensagemErro("Erro ao buscar os dados");
@@ -61,6 +65,15 @@ function CadastroUsuario() {
       novosErros.cpf = "CPF inválido. Use o formato Ex: 123.456.789-09";
     }
 
+    if (!String(senha || "").trim()) {
+      novosErros.senha = "Informe a senha.";
+    }
+    if (!String(repetirSenha || "").trim()) {
+      novosErros.repetirSenha = "Informe a repetição da senha.";
+    } else if (senha !== repetirSenha) {
+      novosErros.repetirSenha = "As senhas não conferem.";
+    }
+
     setErros(novosErros);
 
     if (Object.keys(novosErros).length > 0) {
@@ -72,6 +85,8 @@ function CadastroUsuario() {
       login,
       cpf: cpf.replace(/[^\d]+/g, ""), // remove pontos e traço
       administrador,
+      senha,
+      repetirSenha,
     };
 
     try {
@@ -145,6 +160,34 @@ function CadastroUsuario() {
                   className={`form-control ${erros.cpf ? "is-invalid" : ""}`}
                   onChange={(e) => setCpf(formatarCpf(e.target.value))}
                   placeholder="Ex: 123.456.789-09"
+                  required
+                />
+              </FormGroup>
+            </div>
+            <div className="col-md-6 mb-3">
+              <FormGroup label="Senha: *" htmlFor="inputSenha">
+                <input
+                  type="text"
+                  id="inputSenha"
+                  value={senha}
+                  className={`form-control ${erros.senha ? "is-invalid" : ""}`}
+                  onChange={(e) => setSenha(e.target.value)}
+                  placeholder="Digite a senha"
+                  required
+                />
+              </FormGroup>
+            </div>
+            <div className="col-md-6 mb-3">
+              <FormGroup label="Repetir Senha: *" htmlFor="inputRepetirSenha">
+                <input
+                  type="text"
+                  id="inputRepetirSenha"
+                  value={repetirSenha}
+                  className={`form-control ${
+                    erros.repetirSenha ? "is-invalid" : ""
+                  }`}
+                  onChange={(e) => setRepetirSenha(e.target.value)}
+                  placeholder="Digite a senha novamente"
                   required
                 />
               </FormGroup>
