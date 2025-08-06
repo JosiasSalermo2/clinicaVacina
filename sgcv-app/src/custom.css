@@ -349,6 +349,9 @@ body {
   cursor: pointer !important;
 }
 
+.no-break {
+  white-space: nowrap;
+}
 
 
 /* Ajusta o Popper do MUI para não invadir a borda inferior do input */
