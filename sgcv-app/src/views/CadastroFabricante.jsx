@@ -25,11 +25,20 @@ function CadastroFabricante() {
   const [razaoSocial, setRazaoSocial] = useState("");
   const [telefoneDdd, setTelefoneDdd] = useState("");
   const [telefoneNumero, setTelefoneNumero] = useState("");
+  const [enderecoLogradouro, setEnderecoLogradouro] = useState("");
+  const [enderecoNumero, setEnderecoNumero] = useState("");
+  const [enderecoComplemento, setEnderecoComplemento] = useState("");
+  const [enderecoBairro, setEnderecoBairro] = useState("");
+  const [enderecoCidade, setEnderecoCidade] = useState("");
+  const [enderecoUf, setEnderecoUf] = useState("");
+  const [enderecoCep, setEnderecoCep] = useState("");
   const [loading, setLoading] = useState(true);
   const [erros, setErros] = useState({});
 
   const [telefones, setTelefones] = useState([]);
   const [telefoneId, setTelefoneId] = useState("");
+  const [enderecos, setEnderecos] = useState([]);
+  const [enderecoId, setEnderecoId] = useState("");
 
   async function salvar() {
     const novosErros = {};
@@ -53,48 +62,73 @@ function CadastroFabricante() {
     }
 
     try {
-    let idTelefoneCriado = telefoneId;
+      let idTelefoneCriado = telefoneId;
+      let idEnderecoCriado = enderecoId;
 
-    if (!idParam && !telefoneId) {
-      const responseTelefone = await axios.post(`${BASE_URL}/telefones`, {
-        ddd: telefoneDdd,
-        numero: telefoneNumero,
-      });
-      idTelefoneCriado = responseTelefone.data.id;
+      if (!idParam && !telefoneId) {
+        const responseTelefone = await axios.post(`${BASE_URL}/telefones`, {
+          ddd: telefoneDdd,
+          numero: telefoneNumero,
+        });
+        idTelefoneCriado = responseTelefone.data.id;
+      }
+
+      if (!idParam && !enderecoId) {
+        const responseEndereco = await axios.post(`${BASE_URL}/enderecos`, {
+          logradouro: enderecoLogradouro,
+          numero: enderecoNumero,
+          complemento: enderecoComplemento,
+          bairro: enderecoBairro,
+          cidade: enderecoCidade,
+          uf: enderecoUf,
+          cep: enderecoCep,
+        });
+        idEnderecoCriado = responseEndereco.data.id;
+      }
+
+      const data = {
+        nomeFantasia,
+        email,
+        cnpj,
+        razaoSocial,
+        telefoneId: idTelefoneCriado,
+        telefoneDDD: telefoneDdd,
+        telefoneNumero,
+        enderecoId: idEnderecoCriado,
+      };
+
+      if (idParam) data.id = id;
+
+      if (!idParam) {
+        await axios.post(baseURL, data);
+        mensagemSucesso(`Fabricante ${nomeFantasia} cadastrado com sucesso!`);
+        setNomeFantasia("");
+        setEmail("");
+        setCnpj("");
+        setRazaoSocial("");
+        setTelefoneDdd("");
+        setTelefoneNumero("");
+        setTelefoneId("");
+        setEnderecoId("");
+        setEnderecoLogradouro("");
+        setEnderecoNumero("");
+        setEnderecoComplemento("");
+        setEnderecoBairro("");
+        setEnderecoCidade("");
+        setEnderecoUf("");
+        setEnderecoCep("");
+        setErros({});
+      } else {
+        await axios.put(`${baseURL}/${idParam}`, data);
+        mensagemSucesso(`Fabricante ${nomeFantasia} alterado com sucesso!`);
+        navigate(`/ListagemFabricantes`);
+      }
+
+    } catch (error) {
+      console.error("Erro ao salvar fabricante:", error);
+      mensagemErro(error?.response?.data?.message || "Erro ao salvar o fabricante.");
     }
 
-    const data = {
-      nomeFantasia: nomeFantasia,
-      email,
-      cnpj,
-      razaoSocial,
-      telefoneId: idTelefoneCriado,
-      telefoneDDD: telefoneDdd,
-      telefoneNumero,
-    };
-    if (idParam) data.id = id;
-
-    if (!idParam) {
-      await axios.post(baseURL, data);
-      mensagemSucesso(`Fabricante ${nomeFantasia} cadastrado com sucesso!`);
-      setNomeFantasia("");
-      setEmail("");
-      setCnpj("");
-      setRazaoSocial("");
-      setTelefoneDdd("");
-      setTelefoneNumero("");
-      setTelefoneId("");
-      setErros({});
-    }else {
-    await axios.put(`${baseURL}/${idParam}`, data);
-    mensagemSucesso(`Fabricante ${nomeFantasia} alterado com sucesso!`);
-    navigate(`/ListagemFabricantes`);
-    }
-
-      } catch (error) {
-    console.error("Erro ao salvar fabricante:", error);
-    mensagemErro(error?.response?.data?.message || "Erro ao salvar o fabricante.");
-  }
 
   }
 
@@ -109,6 +143,14 @@ function CadastroFabricante() {
       setRazaoSocial(response.data.razaoSocial);
       setTelefoneDdd(response.data.telefoneDdd);
       setTelefoneNumero(response.data.telefoneNumero);
+      setEnderecoId(response.data.enderecoId);
+      setEnderecoLogradouro(response.data.enderecoLogradouro);
+      setEnderecoNumero(response.data.enderecoNumero);
+      setEnderecoComplemento(response.data.enderecoComplemento);
+      setEnderecoBairro(response.data.enderecoBairro);
+      setEnderecoCidade(response.data.enderecoCidade);
+      setEnderecoUf(response.data.enderecoUf);
+      setEnderecoCep(response.data.enderecoCep);
     } catch (error) {
       console.error("Erro ao buscar os dados:", error);
       mensagemErro("Erro ao buscar os dados");
@@ -139,9 +181,8 @@ function CadastroFabricante() {
                       type="text"
                       id="inputFabricante"
                       value={nomeFantasia}
-                      className={`form-control ${
-                        erros.nomeFantasia ? "is-invalid" : ""
-                      }`}
+                      className={`form-control ${erros.nomeFantasia ? "is-invalid" : ""
+                        }`}
                       onChange={(e) => setNomeFantasia(e.target.value)}
                     />
                     {erros.nomeFantasia && (
@@ -159,54 +200,14 @@ function CadastroFabricante() {
                     type="text"
                     id="inputEmail"
                     value={email}
-                    className={`form-control ${
-                      erros.email ? "is-invalid" : ""
-                    }`}
+                    className={`form-control ${erros.email ? "is-invalid" : ""
+                      }`}
                     onChange={(e) => setEmail(e.target.value)}
                   />
                   {erros.email && (
                     <div className="invalid-feedback">{erros.email}</div>
                   )}
                 </FormGroup>
-
-                <div className="row">
-                  <div className="col-md-6 mb-3">
-                    <FormGroup label="DDD: *" htmlFor="telefoneDdd">
-                      <input
-                        type="text"
-                        id="telefoneDdd"
-                        value={telefoneDdd}
-                        onChange={(e) => setTelefoneDdd(e.target.value)}
-                        className={`form-control ${
-                          erros.ddd ? "is-invalid" : ""
-                        }`}
-                      />
-                      {erros.telefoneDdd && (
-                        <div className="invalid-feedback">
-                          {erros.telefoneDdd}
-                        </div>
-                      )}
-                    </FormGroup>
-                  </div>
-                  <div className="col-md-6 mb-3">
-                    <FormGroup label="Numero: *" htmlFor="telefoneNumero">
-                      <input
-                        type="text"
-                        id="telefoneNumero"
-                        value={telefoneNumero}
-                        onChange={(e) => setTelefoneNumero(e.target.value)}
-                        className={`form-control ${
-                          erros.telefoneNumero ? "is-invalid" : ""
-                        }`}
-                      />
-                      {erros.telefoneNumero && (
-                        <div className="invalid-feedback">
-                          {erros.telefoneNumero}
-                        </div>
-                      )}
-                    </FormGroup>
-                  </div>
-                </div>
 
                 <FormGroup label="CNPJ: *" htmlFor="inputCnpj">
                   <input
@@ -233,6 +234,114 @@ function CadastroFabricante() {
                     <div className="invalid-feedback">{erros.razaoSocial}</div>
                   )}
                 </FormGroup>
+
+                <div className="row">
+                  <div className="col-md-6 mb-3">
+                    <FormGroup label="DDD: " htmlFor="telefoneDdd">
+                      <input
+                        type="text"
+                        id="telefoneDdd"
+                        value={telefoneDdd}
+                        onChange={(e) => setTelefoneDdd(e.target.value)}
+                        className={`form-control ${erros.ddd ? "is-invalid" : ""
+                          }`}
+                      />
+                      {erros.telefoneDdd && (
+                        <div className="invalid-feedback">
+                          {erros.telefoneDdd}
+                        </div>
+                      )}
+                    </FormGroup>
+                  </div>
+                  <div className="col-md-6 mb-3">
+                    <FormGroup label="Numero: " htmlFor="telefoneNumero">
+                      <input
+                        type="text"
+                        id="telefoneNumero"
+                        value={telefoneNumero}
+                        onChange={(e) => setTelefoneNumero(e.target.value)}
+                        className={`form-control ${erros.telefoneNumero ? "is-invalid" : ""
+                          }`}
+                      />
+                      {erros.telefoneNumero && (
+                        <div className="invalid-feedback">
+                          {erros.telefoneNumero}
+                        </div>
+                      )}
+                    </FormGroup>
+                  </div>
+                </div>
+
+                <FormGroup label="Logradouro:" htmlFor="enderecoLogradouro">
+                  <input
+                    type="text"
+                    id="enderecoLogradouro"
+                    value={enderecoLogradouro}
+                    onChange={(e) => setEnderecoLogradouro(e.target.value)}
+                    className="form-control"
+                  />
+                </FormGroup>
+
+                <FormGroup label="Número:" htmlFor="enderecoNumero">
+                  <input
+                    type="text"
+                    id="enderecoNumero"
+                    value={enderecoNumero}
+                    onChange={(e) => setEnderecoNumero(e.target.value)}
+                    className="form-control"
+                  />
+                </FormGroup>
+
+                <FormGroup label="Complemento:" htmlFor="enderecoComplemento">
+                  <input
+                    type="text"
+                    id="enderecoComplemento"
+                    value={enderecoComplemento}
+                    onChange={(e) => setEnderecoComplemento(e.target.value)}
+                    className="form-control"
+                  />
+                </FormGroup>
+
+                <FormGroup label="Bairro:" htmlFor="enderecoBairro">
+                  <input
+                    type="text"
+                    id="enderecoBairro"
+                    value={enderecoBairro}
+                    onChange={(e) => setEnderecoBairro(e.target.value)}
+                    className="form-control"
+                  />
+                </FormGroup>
+
+                <FormGroup label="Cidade:" htmlFor="enderecoCidade">
+                  <input
+                    type="text"
+                    id="enderecoCidade"
+                    value={enderecoCidade}
+                    onChange={(e) => setEnderecoCidade(e.target.value)}
+                    className="form-control"
+                  />
+                </FormGroup>
+
+                <FormGroup label="UF:" htmlFor="enderecoUf">
+                  <input
+                    type="text"
+                    id="enderecoUf"
+                    value={enderecoUf}
+                    onChange={(e) => setEnderecoUf(e.target.value)}
+                    className="form-control"
+                  />
+                </FormGroup>
+
+                <FormGroup label="CEP:" htmlFor="enderecoCep">
+                  <input
+                    type="text"
+                    id="enderecoCep"
+                    value={enderecoCep}
+                    onChange={(e) => setEnderecoCep(e.target.value)}
+                    className="form-control"
+                  />
+                </FormGroup>
+
               </div>
 
               <Stack spacing={1} padding={1} direction="row">
