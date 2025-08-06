@@ -25,16 +25,28 @@ function ListagemFabricantes() {
 
     const carregarDados = async () => {
   try {
-    const [resFabricantes] = await Promise.all([
+    const [resFabricantes, resTelefones] = await Promise.all([
       axios.get(`${BASE_URL}/fabricantes`),
+      axios.get(`${BASE_URL}/telefones`),
     ]);
 
-    const fabricantesComNomes = resFabricantes.data.map((fabricantes) => ({
-      ...fabricantes,
+    const mapaTelefones = resTelefones.data.reduce((map, telefone) => {
+      map[telefone.id] = {
+        ddd: telefone.ddd,
+        numero: telefone.numero,
+      };
+      return map;
+    }, {});
+
+    const fabricantesComTelefones = resFabricantes.data.map((fabricante) => ({
+      ...fabricante,
+      telefoneDdd: mapaTelefones[fabricante.telefoneId]?.ddd || "N/A",
+      telefoneNumero: mapaTelefones[fabricante.telefoneId]?.numero || "N/A",
     }));
 
-    setFabricantes(fabricantesComNomes);
+    setFabricantes(fabricantesComTelefones);
   } catch (error) {
+    console.error("Erro ao carregar dados:", error);
     mensagemErro('Erro ao carregar dados dos fabricantes.');
   }
 };
@@ -77,6 +89,8 @@ function ListagemFabricantes() {
                     <th>E-mail</th>
                     <th>CNPJ</th>
                     <th>Razão Social</th>
+                    <th>DDD</th>
+                    <th>Número</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -86,6 +100,8 @@ function ListagemFabricantes() {
                       <td>{fabricante.email}</td>
                       <td>{fabricante.cnpj}</td>
                       <td>{fabricante.razaoSocial}</td>
+                      <td>{fabricante.telefoneDdd}</td>
+                      <td>{fabricante.telefoneNumero}</td>
                       <td>
                         <Stack spacing={1} padding={0} direction="row">
                           <IconButton
