@@ -176,7 +176,7 @@ function CadastroFabricante() {
             <div className="form-row">
               <div className="mesmaLinha">
                 <div className="col-md-12 mb-3">
-                  <FormGroup label="Fabricante: *" htmlFor="inputFabricante">
+                  <FormGroup label="Fabricante: *" htmlForm="inputFabricante">
                     <input
                       type="text"
                       id="inputFabricante"
@@ -195,7 +195,7 @@ function CadastroFabricante() {
               </div>
 
               <div className="col-md-12 mb-3">
-                <FormGroup label="Email: *" htmlFor="inputEmail">
+                <FormGroup label="Email: *" htmlForm="inputEmail">
                   <input
                     type="text"
                     id="inputEmail"
@@ -209,7 +209,7 @@ function CadastroFabricante() {
                   )}
                 </FormGroup>
 
-                <FormGroup label="CNPJ: *" htmlFor="inputCnpj">
+                <FormGroup label="CNPJ: *" htmlForm="inputCnpj">
                   <input
                     type="text"
                     id="inputCnpj"
@@ -222,7 +222,7 @@ function CadastroFabricante() {
                   )}
                 </FormGroup>
 
-                <FormGroup label="Razão social: " htmlFor="inputRazaoSocial">
+                <FormGroup label="Razão social: " htmlForm="inputRazaoSocial">
                   <input
                     type="text"
                     id="inputRazaoSocial"
@@ -237,7 +237,7 @@ function CadastroFabricante() {
 
                 <div className="row">
                   <div className="col-md-6 mb-3">
-                    <FormGroup label="DDD: " htmlFor="telefoneDdd">
+                    <FormGroup label="DDD: " htmlForm="telefoneDdd">
                       <input
                         type="text"
                         id="telefoneDdd"
@@ -254,7 +254,7 @@ function CadastroFabricante() {
                     </FormGroup>
                   </div>
                   <div className="col-md-6 mb-3">
-                    <FormGroup label="Numero: " htmlFor="telefoneNumero">
+                    <FormGroup label="Numero: " htmlForm="telefoneNumero">
                       <input
                         type="text"
                         id="telefoneNumero"
@@ -272,7 +272,7 @@ function CadastroFabricante() {
                   </div>
                 </div>
 
-                <FormGroup label="Logradouro:" htmlFor="enderecoLogradouro">
+                <FormGroup label="Logradouro:" htmlForm="enderecoLogradouro">
                   <input
                     type="text"
                     id="enderecoLogradouro"
@@ -282,7 +282,7 @@ function CadastroFabricante() {
                   />
                 </FormGroup>
 
-                <FormGroup label="Número:" htmlFor="enderecoNumero">
+                <FormGroup label="Número:" htmlForm="enderecoNumero">
                   <input
                     type="text"
                     id="enderecoNumero"
@@ -292,7 +292,7 @@ function CadastroFabricante() {
                   />
                 </FormGroup>
 
-                <FormGroup label="Complemento:" htmlFor="enderecoComplemento">
+                <FormGroup label="Complemento:" htmlForm="enderecoComplemento">
                   <input
                     type="text"
                     id="enderecoComplemento"
@@ -302,7 +302,7 @@ function CadastroFabricante() {
                   />
                 </FormGroup>
 
-                <FormGroup label="Bairro:" htmlFor="enderecoBairro">
+                <FormGroup label="Bairro:" htmlForm="enderecoBairro">
                   <input
                     type="text"
                     id="enderecoBairro"
@@ -312,7 +312,7 @@ function CadastroFabricante() {
                   />
                 </FormGroup>
 
-                <FormGroup label="Cidade:" htmlFor="enderecoCidade">
+                <FormGroup label="Cidade:" htmlForm="enderecoCidade">
                   <input
                     type="text"
                     id="enderecoCidade"
@@ -322,7 +322,7 @@ function CadastroFabricante() {
                   />
                 </FormGroup>
 
-                <FormGroup label="UF:" htmlFor="enderecoUf">
+                <FormGroup label="UF:" htmlForm="enderecoUf">
                   <input
                     type="text"
                     id="enderecoUf"
@@ -332,7 +332,7 @@ function CadastroFabricante() {
                   />
                 </FormGroup>
 
-                <FormGroup label="CEP:" htmlFor="enderecoCep">
+                <FormGroup label="CEP:" htmlForm="enderecoCep">
                   <input
                     type="text"
                     id="enderecoCep"
