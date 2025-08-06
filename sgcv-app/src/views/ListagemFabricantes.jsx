@@ -89,8 +89,7 @@ function ListagemFabricantes() {
                     <th>E-mail</th>
                     <th>CNPJ</th>
                     <th>Razão Social</th>
-                    <th>DDD</th>
-                    <th>Número</th>
+                    <th>Telefone</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -100,8 +99,9 @@ function ListagemFabricantes() {
                       <td>{fabricante.email}</td>
                       <td>{fabricante.cnpj}</td>
                       <td>{fabricante.razaoSocial}</td>
-                      <td>{fabricante.telefoneDdd}</td>
-                      <td>{fabricante.telefoneNumero}</td>
+                      <td className="no-break">
+                        ({fabricante.telefoneDdd}) {fabricante.telefoneNumero}
+                      </td>
                       <td>
                         <Stack spacing={1} padding={0} direction="row">
                           <IconButton
