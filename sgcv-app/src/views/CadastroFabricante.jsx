@@ -23,8 +23,13 @@ function CadastroFabricante() {
   const [email, setEmail] = useState("");
   const [cnpj, setCnpj] = useState("");
   const [razaoSocial, setRazaoSocial] = useState("");
+  const [telefoneDdd, setTelefoneDdd] = useState("");
+  const [telefoneNumero, setTelefoneNumero] = useState("");
   const [loading, setLoading] = useState(true);
   const [erros, setErros] = useState({});
+
+  const [telefones, setTelefones] = useState([]);
+  const [telefoneId, setTelefoneId] = useState("");
 
   async function salvar() {
     const novosErros = {};
@@ -47,31 +52,50 @@ function CadastroFabricante() {
       return;
     }
 
+    try {
+    let idTelefoneCriado = telefoneId;
+
+    if (!idParam && !telefoneId) {
+      const responseTelefone = await axios.post(`${BASE_URL}/telefones`, {
+        ddd: telefoneDdd,
+        numero: telefoneNumero,
+      });
+      idTelefoneCriado = responseTelefone.data.id;
+    }
+
     const data = {
       nomeFantasia: nomeFantasia,
       email,
       cnpj,
       razaoSocial,
+      telefoneId: idTelefoneCriado,
+      telefoneDDD: telefoneDdd,
+      telefoneNumero,
     };
     if (idParam) data.id = id;
 
-    try {
-      if (!idParam) {
-        await axios.post(baseURL, data);
-        mensagemSucesso(`Fabricante ${nomeFantasia} cadastrado com sucesso!`);
-        setNomeFantasia("");
-        setEmail("");
-        setCnpj("");
-        setRazaoSocial("");
-        setErros({});
-      } else {
-        await axios.put(`${baseURL}/${idParam}`, data);
-        mensagemSucesso(`Fabricante ${nomeFantasia} alterado com sucesso!`);
-        navigate(`/ListagemFabricantes`);
-      }
-    } catch (error) {
-      mensagemErro(error?.response?.data || "Erro ao salvar o fabricante.");
+    if (!idParam) {
+      await axios.post(baseURL, data);
+      mensagemSucesso(`Fabricante ${nomeFantasia} cadastrado com sucesso!`);
+      setNomeFantasia("");
+      setEmail("");
+      setCnpj("");
+      setRazaoSocial("");
+      setTelefoneDdd("");
+      setTelefoneNumero("");
+      setTelefoneId("");
+      setErros({});
+    }else {
+    await axios.put(`${baseURL}/${idParam}`, data);
+    mensagemSucesso(`Fabricante ${nomeFantasia} alterado com sucesso!`);
+    navigate(`/ListagemFabricantes`);
     }
+
+      } catch (error) {
+    console.error("Erro ao salvar fabricante:", error);
+    mensagemErro(error?.response?.data?.message || "Erro ao salvar o fabricante.");
+  }
+
   }
 
   async function buscar() {
@@ -81,7 +105,10 @@ function CadastroFabricante() {
       setNomeFantasia(response.data.nomeFantasia);
       setEmail(response.data.email);
       setCnpj(response.data.cnpj);
+      setTelefoneId(response.data.telefoneId);
       setRazaoSocial(response.data.razaoSocial);
+      setTelefoneDdd(response.data.telefoneDdd);
+      setTelefoneNumero(response.data.telefoneNumero);
     } catch (error) {
       console.error("Erro ao buscar os dados:", error);
       mensagemErro("Erro ao buscar os dados");
@@ -113,7 +140,7 @@ function CadastroFabricante() {
                       id="inputFabricante"
                       value={nomeFantasia}
                       className={`form-control ${
-                        erros.numeroLote ? "is-invalid" : ""
+                        erros.nomeFantasia ? "is-invalid" : ""
                       }`}
                       onChange={(e) => setNomeFantasia(e.target.value)}
                     />
@@ -141,6 +168,45 @@ function CadastroFabricante() {
                     <div className="invalid-feedback">{erros.email}</div>
                   )}
                 </FormGroup>
+
+                <div className="row">
+                  <div className="col-md-6 mb-3">
+                    <FormGroup label="DDD: *" htmlFor="telefoneDdd">
+                      <input
+                        type="text"
+                        id="telefoneDdd"
+                        value={telefoneDdd}
+                        onChange={(e) => setTelefoneDdd(e.target.value)}
+                        className={`form-control ${
+                          erros.ddd ? "is-invalid" : ""
+                        }`}
+                      />
+                      {erros.telefoneDdd && (
+                        <div className="invalid-feedback">
+                          {erros.telefoneDdd}
+                        </div>
+                      )}
+                    </FormGroup>
+                  </div>
+                  <div className="col-md-6 mb-3">
+                    <FormGroup label="Numero: *" htmlFor="telefoneNumero">
+                      <input
+                        type="text"
+                        id="telefoneNumero"
+                        value={telefoneNumero}
+                        onChange={(e) => setTelefoneNumero(e.target.value)}
+                        className={`form-control ${
+                          erros.telefoneNumero ? "is-invalid" : ""
+                        }`}
+                      />
+                      {erros.telefoneNumero && (
+                        <div className="invalid-feedback">
+                          {erros.telefoneNumero}
+                        </div>
+                      )}
+                    </FormGroup>
+                  </div>
+                </div>
 
                 <FormGroup label="CNPJ: *" htmlFor="inputCnpj">
                   <input
