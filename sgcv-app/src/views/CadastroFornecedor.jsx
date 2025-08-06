@@ -24,8 +24,13 @@ function CadastroFornecedor() {
   const [email, setEmail] = useState("");
   const [cnpj, setCnpj] = useState("");
   const [razaoSocial, setRazaoSocial] = useState("");
+  const [telefoneDdd, setTelefoneDdd] = useState("");
+  const [telefoneNumero, setTelefoneNumero] = useState("");
   const [loading, setLoading] = useState(true);
   const [erros, setErros] = useState({});
+
+  const [telefones, setTelefones] = useState([]);
+  const [telefoneId, setTelefoneId] = useState("");
 
 async function salvar() {
   const novosErros = {};
@@ -48,11 +53,25 @@ async function salvar() {
     return;
   }
 
+  try {
+    let idTelefoneCriado = telefoneId;
+
+    if (!idParam && !telefoneId) {
+      const responseTelefone = await axios.post(`${BASE_URL}/telefones`, {
+        ddd: telefoneDdd,
+        numero: telefoneNumero,
+      });
+      idTelefoneCriado = responseTelefone.data.id;
+    }
+
   const data = {
     nomeFantasia: nomeFantasia,
     email,
     cnpj,
     razaoSocial,
+    telefoneId: idTelefoneCriado,
+    telefoneDDD: telefoneDdd,
+    telefoneNumero,
   };
   if (idParam) data.id = id;
 
@@ -64,6 +83,9 @@ async function salvar() {
       setEmail("");
       setCnpj("");
       setRazaoSocial("");
+      setTelefoneDdd("");
+      setTelefoneNumero("");
+      setTelefoneId("");
       setErros({});
     } else {
       await axios.put(`${baseURL}/${idParam}`, data);
@@ -71,7 +93,13 @@ async function salvar() {
       navigate(`/ListagemFornecedores`);
     }
   } catch (error) {
-    mensagemErro(error?.response?.data || "Erro ao salvar o fornecedor.");
+      console.error("Erro ao salvar fabricante:", error);
+      mensagemErro(error?.response?.data?.message || "Erro ao salvar o fabricante.");
+  }
+
+    } catch (error) {
+    console.error("Erro interno ao salvar:", error);
+    mensagemErro("Erro inesperado no salvamento.");
   }
 }
 
@@ -84,6 +112,9 @@ async function salvar() {
       setEmail(response.data.email);
       setCnpj(response.data.cnpj);
       setRazaoSocial(response.data.razaoSocial);
+      setTelefoneId(response.data.telefoneId);
+      setTelefoneDdd(response.data.telefoneDdd);
+      setTelefoneNumero(response.data.telefoneNumero);
     } catch (error) {
       console.error("Erro ao buscar os dados:", error);
       mensagemErro("Erro ao buscar os dados");
@@ -117,7 +148,7 @@ async function salvar() {
                       type="text"
                       id="inputFornecedor"
                       value={nomeFantasia}
-                      className={`form-control ${erros.numeroLote ? "is-invalid" : ""}`}
+                      className={`form-control ${erros.nomeFantasia ? "is-invalid" : ""}`}
                       onChange={(e) => setNomeFantasia(e.target.value)}
                     />
                     {erros.nomeFantasia && (
@@ -155,6 +186,45 @@ async function salvar() {
                     <div className="invalid-feedback">{erros.cnpj}</div>
                   )}
                 </FormGroup>
+
+                <div className="row">
+                  <div className="col-md-6 mb-3">
+                    <FormGroup label="DDD: *" htmlFor="telefoneDdd">
+                      <input
+                        type="text"
+                        id="telefoneDdd"
+                        value={telefoneDdd}
+                        onChange={(e) => setTelefoneDdd(e.target.value)}
+                        className={`form-control ${
+                          erros.telefoneDdd ? "is-invalid" : ""
+                        }`}
+                      />
+                      {erros.telefoneDdd && (
+                        <div className="invalid-feedback">
+                          {erros.telefoneDdd}
+                        </div>
+                      )}
+                    </FormGroup>
+                  </div>
+                  <div className="col-md-6 mb-3">
+                    <FormGroup label="Numero: *" htmlFor="telefoneNumero">
+                      <input
+                        type="text"
+                        id="telefoneNumero"
+                        value={telefoneNumero}
+                        onChange={(e) => setTelefoneNumero(e.target.value)}
+                        className={`form-control ${
+                          erros.telefoneNumero ? "is-invalid" : ""
+                        }`}
+                      />
+                      {erros.telefoneNumero && (
+                        <div className="invalid-feedback">
+                          {erros.telefoneNumero}
+                        </div>
+                      )}
+                    </FormGroup>
+                  </div>
+                </div>
 
                 <FormGroup label="Razão social: " htmlFor="inputRazaoSocial">
                   <input
