@@ -22,31 +22,53 @@ function ListagemFornecedores() {
   }, []);
 
   const carregarDados = async () => {
-  try {
-    const [resFornecedores, resTelefones] = await Promise.all([
-      axios.get(`${BASE_URL}/fornecedores`),
-      axios.get(`${BASE_URL}/telefones`),
-    ]);
+    try {
+      const [resFornecedores, resTelefones, resEnderecos] = await Promise.all([
+        axios.get(`${BASE_URL}/fornecedores`),
+        axios.get(`${BASE_URL}/telefones`),
+        axios.get(`${BASE_URL}/enderecos`),
+      ]);
 
-    const mapaTelefones = resTelefones.data.reduce((map, telefone) => {
-      map[telefone.id] = {
-        ddd: telefone.ddd,
-        numero: telefone.numero,
-      };
-      return map;
-    }, {});
+      const mapaTelefones = resTelefones.data.reduce((map, telefone) => {
+        map[telefone.id] = {
+          ddd: telefone.ddd,
+          numero: telefone.numero,
+        };
+        return map;
+      }, {});
 
-    const fornecedoresComTelefones = resFornecedores.data.map((fornecedor) => ({
-      ...fornecedor,
-      telefoneDdd: mapaTelefones[fornecedor.telefoneId]?.ddd || "N/A",
-      telefoneNumero: mapaTelefones[fornecedor.telefoneId]?.numero || "N/A",
-    }));
+      const mapaEnderecos = resEnderecos.data.reduce((map, endereco) => {
+        map[endereco.id] = {
+          logradouro: endereco.logradouro,
+          numero: endereco.numero,
+          complemento: endereco.complemento,
+          bairro: endereco.bairro,
+          cidade: endereco.cidade,
+          uf: endereco.uf,
+          cep: endereco.cep
+        };
+        return map;
+      }, {});
 
-    setFornecedores(fornecedoresComTelefones);
-  } catch (error) {
-    mensagemErro('Erro ao carregar dados dos fornecedores.');
-  }
-};
+      const fornecedoresComDados = resFornecedores.data.map((fornecedor) => ({
+        ...fornecedor,
+        telefoneDdd: mapaTelefones[fornecedor.telefoneId]?.ddd || "N/A",
+        telefoneNumero: mapaTelefones[fornecedor.telefoneId]?.numero || "N/A",
+        enderecoLogradouro: mapaEnderecos[fornecedor.enderecoId]?.logradouro || "N/A",
+        enderecoNumero: mapaEnderecos[fornecedor.enderecoId]?.numero || "N/A",
+        enderecoComplemento: mapaEnderecos[fornecedor.enderecoId]?.complemento || "",
+        enderecoBairro: mapaEnderecos[fornecedor.enderecoId]?.bairro || "N/A",
+        enderecoCidade: mapaEnderecos[fornecedor.enderecoId]?.cidade || "N/A",
+        enderecoUf: mapaEnderecos[fornecedor.enderecoId]?.uf || "N/A",
+        enderecoCep: mapaEnderecos[fornecedor.enderecoId]?.cep || "N/A",
+      }));
+
+      setFornecedores(fornecedoresComDados);
+    } catch (error) {
+      console.error("Erro ao carregar dados:", error);
+      mensagemErro('Erro ao carregar dados dos fornecedores.');
+    }
+  };
 
 
   const redirecionarCadastro = () => {
@@ -87,7 +109,8 @@ function ListagemFornecedores() {
                     <th>E-mail</th>
                     <th>CNPJ</th>
                     <th>Razão Social</th>
-                    <th>Telefone</th>
+                    <th>Endereço</th>
+                    <th>Ações</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -99,6 +122,12 @@ function ListagemFornecedores() {
                       <td>{fornecedor.razaoSocial}</td>
                       <td className="no-break">
                         ({fornecedor.telefoneDdd}) {fornecedor.telefoneNumero}
+                      </td>
+                      <td>
+                        {fornecedor.enderecoLogradouro}, {fornecedor.enderecoNumero}
+                        {fornecedor.enderecoComplemento && `, ${fornecedor.enderecoComplemento}`}<br />
+                        {fornecedor.enderecoBairro} - {fornecedor.enderecoCidade}/{fornecedor.enderecoUf}<br />
+                        CEP: {fornecedor.enderecoCep}
                       </td>
                       <td>
                         <Stack spacing={1} padding={0} direction="row">
