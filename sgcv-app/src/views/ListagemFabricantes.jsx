@@ -20,36 +20,57 @@ function ListagemFabricantes() {
   const [fabricantes, setFabricantes] = useState([]);
 
   useEffect(() => {
-      carregarDados();
-    }, []);
+    carregarDados();
+  }, []);
 
-    const carregarDados = async () => {
-  try {
-    const [resFabricantes, resTelefones] = await Promise.all([
-      axios.get(`${BASE_URL}/fabricantes`),
-      axios.get(`${BASE_URL}/telefones`),
-    ]);
+  const carregarDados = async () => {
+    try {
+      const [resFabricantes, resTelefones, resEnderecos] = await Promise.all([
+        axios.get(`${BASE_URL}/fabricantes`),
+        axios.get(`${BASE_URL}/telefones`),
+        axios.get(`${BASE_URL}/enderecos`),
+      ]);
 
-    const mapaTelefones = resTelefones.data.reduce((map, telefone) => {
-      map[telefone.id] = {
-        ddd: telefone.ddd,
-        numero: telefone.numero,
-      };
-      return map;
-    }, {});
+      const mapaTelefones = resTelefones.data.reduce((map, telefone) => {
+        map[telefone.id] = {
+          ddd: telefone.ddd,
+          numero: telefone.numero,
+        };
+        return map;
+      }, {});
 
-    const fabricantesComTelefones = resFabricantes.data.map((fabricante) => ({
-      ...fabricante,
-      telefoneDdd: mapaTelefones[fabricante.telefoneId]?.ddd || "N/A",
-      telefoneNumero: mapaTelefones[fabricante.telefoneId]?.numero || "N/A",
-    }));
+      const mapaEnderecos = resEnderecos.data.reduce((map, endereco) => {
+        map[endereco.id] = {
+          logradouro: endereco.logradouro,
+          numero: endereco.numero,
+          complemento: endereco.complemento,
+          bairro: endereco.bairro,
+          cidade: endereco.cidade,
+          uf: endereco.uf,
+          cep: endereco.cep
+        };
+        return map;
+      }, {});
 
-    setFabricantes(fabricantesComTelefones);
-  } catch (error) {
-    console.error("Erro ao carregar dados:", error);
-    mensagemErro('Erro ao carregar dados dos fabricantes.');
-  }
-};
+      const fabricantesComDados = resFabricantes.data.map((fabricante) => ({
+        ...fabricante,
+        telefoneDdd: mapaTelefones[fabricante.telefoneId]?.ddd || "N/A",
+        telefoneNumero: mapaTelefones[fabricante.telefoneId]?.numero || "N/A",
+        enderecoLogradouro: mapaEnderecos[fabricante.enderecoId]?.logradouro || "N/A",
+        enderecoNumero: mapaEnderecos[fabricante.enderecoId]?.numero || "N/A",
+        enderecoComplemento: mapaEnderecos[fabricante.enderecoId]?.complemento || "",
+        enderecoBairro: mapaEnderecos[fabricante.enderecoId]?.bairro || "N/A",
+        enderecoCidade: mapaEnderecos[fabricante.enderecoId]?.cidade || "N/A",
+        enderecoUf: mapaEnderecos[fabricante.enderecoId]?.uf || "N/A",
+        enderecoCep: mapaEnderecos[fabricante.enderecoId]?.cep || "N/A",
+      }));
+
+      setFabricantes(fabricantesComDados);
+    } catch (error) {
+      console.error("Erro ao carregar dados:", error);
+      mensagemErro('Erro ao carregar dados dos fabricantes.');
+    }
+  };
 
   const redirecionarCadastro = () => {
     navigate('/CadastroFabricante');
@@ -90,6 +111,8 @@ function ListagemFabricantes() {
                     <th>CNPJ</th>
                     <th>Razão Social</th>
                     <th>Telefone</th>
+                    <th>Endereço</th>
+                    <th>Ações</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -102,6 +125,13 @@ function ListagemFabricantes() {
                       <td className="no-break">
                         ({fabricante.telefoneDdd}) {fabricante.telefoneNumero}
                       </td>
+                      <td>
+                        {fabricante.enderecoLogradouro}, {fabricante.enderecoNumero}
+                        {fabricante.enderecoComplemento && `, ${fabricante.enderecoComplemento}`}<br />
+                        {fabricante.enderecoBairro} - {fabricante.enderecoCidade}/{fabricante.enderecoUf}<br />
+                        CEP: {fabricante.enderecoCep}
+                      </td>
+
                       <td>
                         <Stack spacing={1} padding={0} direction="row">
                           <IconButton
