@@ -23,15 +23,26 @@ function ListagemFornecedores() {
 
   const carregarDados = async () => {
   try {
-    const [resFornecedores] = await Promise.all([
+    const [resFornecedores, resTelefones] = await Promise.all([
       axios.get(`${BASE_URL}/fornecedores`),
+      axios.get(`${BASE_URL}/telefones`),
     ]);
 
-    const fornecedoresComNomes = resFornecedores.data.map((fornecedor) => ({
+    const mapaTelefones = resTelefones.data.reduce((map, telefone) => {
+      map[telefone.id] = {
+        ddd: telefone.ddd,
+        numero: telefone.numero,
+      };
+      return map;
+    }, {});
+
+    const fornecedoresComTelefones = resFornecedores.data.map((fornecedor) => ({
       ...fornecedor,
+      telefoneDdd: mapaTelefones[fornecedor.telefoneId]?.ddd || "N/A",
+      telefoneNumero: mapaTelefones[fornecedor.telefoneId]?.numero || "N/A",
     }));
 
-    setFornecedores(fornecedoresComNomes);
+    setFornecedores(fornecedoresComTelefones);
   } catch (error) {
     mensagemErro('Erro ao carregar dados dos fornecedores.');
   }
@@ -76,6 +87,7 @@ function ListagemFornecedores() {
                     <th>E-mail</th>
                     <th>CNPJ</th>
                     <th>Razão Social</th>
+                    <th>Telefone</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -85,6 +97,9 @@ function ListagemFornecedores() {
                       <td>{fornecedor.email}</td>
                       <td>{fornecedor.cnpj}</td>
                       <td>{fornecedor.razaoSocial}</td>
+                      <td className="no-break">
+                        ({fornecedor.telefoneDdd}) {fornecedor.telefoneNumero}
+                      </td>
                       <td>
                         <Stack spacing={1} padding={0} direction="row">
                           <IconButton
@@ -92,7 +107,9 @@ function ListagemFornecedores() {
                           >
                             <EditIcon />
                           </IconButton>
-                          <IconButton onClick={() => excluirFornecedor(fornecedor.id)}>
+                          <IconButton
+                            onClick={() => excluirFornecedor(fornecedor.id)}
+                          >
                             <DeleteIcon />
                           </IconButton>
                         </Stack>
