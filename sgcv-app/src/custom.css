@@ -353,6 +353,20 @@ body {
   white-space: nowrap;
 }
 
+.login-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  padding: 20px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+}
+
 
 /* Ajusta o Popper do MUI para não invadir a borda inferior do input */
 .MuiAutocomplete-popper {
