@@ -1,6 +1,9 @@
 import React from "react";
+import Login from './views/Login';
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LoadingOverlay from "./LoadingOverlay";
+import RotaPrivada from './views/RotaPrivada';
+
 
 // CADASTRO
 import CadastroPaciente from "./views/CadastroPaciente";
@@ -48,11 +51,13 @@ function Rotas() {
   }, []);
 
   return (
-    <BrowserRouter>
+    <>
       {loading && <LoadingOverlay loading={loading} />}
 
       <Routes>
-        <Route path="/" element={<Navigate to="/ListagemVacinacao" />} />
+        <Route path="/" element={<Navigate to="/Login" />} />
+        <Route path="/Login" element={<Login />} />
+
 
         {/* ROTAS DE CADASTRO */}
         <Route path="/CadastroPaciente" element={<CadastroPaciente />} />
@@ -165,7 +170,7 @@ function Rotas() {
         />
         {/* REDIRECIONAMENTO */}
       </Routes>
-    </BrowserRouter>
+    </>
   );
 }
 
