@@ -13,6 +13,8 @@ function NavBar(props) {
   const [isDropdownOpen8, setDropdownOpen8] = useState(false);
   const [isDropdownOpen9, setDropdownOpen9] = useState(false);
 
+  const role = localStorage.getItem("role"); // ADMIN ou USER
+
   const closeAllDropdowns = () => {
     setDropdownOpen1(false);
     setDropdownOpen2(false);
@@ -76,15 +78,16 @@ function NavBar(props) {
               </div>
             </li>
 
-            <li className="nav-item dropdown" onMouseEnter={() => handleMouseEnter(2)} onMouseLeave={handleMouseLeave}>
-              <span className={`nav-link ${isDropdownOpen2 ? "active" : ""}`} id="navbarDropdown2" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded={isDropdownOpen2}>
-                Usuários
-              </span>
-              <div className={`dropdown-menu ${isDropdownOpen2 ? "show" : ""}`} aria-labelledby="navbarDropdown2">
-                <a className="dropdown-item" href="CadastroUsuario">Cadastrar Usuário</a>
-                <a className="dropdown-item" href="ListagemUsuarios">Listagem de Usuários</a>
-              </div>
-            </li>
+            {role === "ADMIN" && (
+              <li className="nav-item dropdown" onMouseEnter={() => handleMouseEnter(2)} onMouseLeave={handleMouseLeave}>
+                <span className={`nav-link ${isDropdownOpen2 ? "active" : ""}`} id="navbarDropdown2" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded={isDropdownOpen2}>
+                  Usuários
+                </span>
+                <div className={`dropdown-menu ${isDropdownOpen2 ? "show" : ""}`} aria-labelledby="navbarDropdown2">
+                  {role === "ADMIN" && <a className="dropdown-item" href="CadastroUsuario">Cadastrar Usuário</a>}
+                  {role === "ADMIN" && <a className="dropdown-item" href="ListagemUsuarios">Listagem de Usuários</a>}
+                </div>
+              </li>)}
 
             <li className="nav-item dropdown" onMouseEnter={() => handleMouseEnter(3)} onMouseLeave={handleMouseLeave}>
               <span className={`nav-link ${isDropdownOpen3 ? "active" : ""}`} id="navbarDropdown3" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded={isDropdownOpen3}>
@@ -95,30 +98,30 @@ function NavBar(props) {
                 <a className="dropdown-item" href="ListagemVacinacao">Vacinação do dia</a>
               </div>
             </li>
-
             <li className="nav-item dropdown" onMouseEnter={() => handleMouseEnter(4)} onMouseLeave={handleMouseLeave}>
               <span className={`nav-link ${isDropdownOpen4 ? "active" : ""}`} id="navbarDropdown4" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded={isDropdownOpen4}>
                 Vacinas
               </span>
               <div className={`dropdown-menu ${isDropdownOpen4 ? "show" : ""}`} aria-labelledby="navbarDropdown4">
-                <a className="dropdown-item" href="CadastroVacina">Cadastrar Vacina</a>
-                <a className="dropdown-item" href="ListagemVacinas">Listagem de Vacinas</a>
+                {role === "ADMIN" && <a className="dropdown-item" href="CadastroVacina">Cadastrar Vacina</a>}
+                {role === "ADMIN" && <a className="dropdown-item" href="ListagemVacinas">Listagem de Vacinas</a>}
                 <a className="dropdown-item" href="CadastroTipoVacina">Cadastrar Tipo de vacina</a>
                 <a className="dropdown-item" href="ListagemTipoVacinas">Listagem de Tipo de vacina</a>
               </div>
             </li>
 
-            <li className="nav-item dropdown" onMouseEnter={() => handleMouseEnter(5)} onMouseLeave={handleMouseLeave}>
-              <span className={`nav-link ${isDropdownOpen5 ? "active" : ""}`} id="navbarDropdown5" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded={isDropdownOpen5}>
-                Funcionários
-              </span>
-              <div className={`dropdown-menu ${isDropdownOpen5 ? "show" : ""}`} aria-labelledby="navbarDropdown5">
-                <a className="dropdown-item" href="CadastroFuncionario">Cadastrar Funcionário</a>
-                <a className="dropdown-item" href="ListagemFuncionarios">Listagem de Funcionários</a>
-                <a className="dropdown-item" href="CadastroCargo">Cadastrar Cargo</a>
-                <a className="dropdown-item" href="ListagemCargos">Listagem de Cargos</a>
-              </div>
-            </li>
+            {role === "ADMIN" && (
+              <li className="nav-item dropdown" onMouseEnter={() => handleMouseEnter(5)} onMouseLeave={handleMouseLeave}>
+                <span className={`nav-link ${isDropdownOpen5 ? "active" : ""}`} id="navbarDropdown5" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded={isDropdownOpen5}>
+                  Funcionários
+                </span>
+                <div className={`dropdown-menu ${isDropdownOpen5 ? "show" : ""}`} aria-labelledby="navbarDropdown5">
+                  <a className="dropdown-item" href="CadastroFuncionario">Cadastrar Funcionário</a>
+                  <a className="dropdown-item" href="ListagemFuncionarios">Listagem de Funcionários</a>
+                  <a className="dropdown-item" href="CadastroCargo">Cadastrar Cargo</a>
+                  <a className="dropdown-item" href="ListagemCargos">Listagem de Cargos</a>
+                </div>
+              </li>)}
 
             <li className="nav-item dropdown" onMouseEnter={() => handleMouseEnter(7)} onMouseLeave={handleMouseLeave}>
               <span className={`nav-link ${isDropdownOpen7 ? "active" : ""}`} id="navbarDropdown7" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded={isDropdownOpen7}>
@@ -137,8 +140,8 @@ function NavBar(props) {
                 Compras
               </span>
               <div className={`dropdown-menu ${isDropdownOpen8 ? "show" : ""}`} aria-labelledby="navbarDropdown8">
-                <a className="dropdown-item" href="CadastroCompra">Cadastrar Compra</a>
-                <a className="dropdown-item" href="ListagemCompra">Listagem de Compras</a>
+                {role === "ADMIN" && <a className="dropdown-item" href="CadastroCompra">Cadastrar Compra</a>}
+                {role === "ADMIN" && <a className="dropdown-item" href="ListagemCompra">Listagem de Compras</a>}
                 <a className="dropdown-item" href="CadastroFornecedor">Cadastrar Fornecedor</a>
                 <a className="dropdown-item" href="ListagemFornecedores">Listagem de Fornecedores</a>
                 <a className="dropdown-item" href="CadastroFabricante">Cadastrar Fabricante</a>
@@ -159,6 +162,20 @@ function NavBar(props) {
                 <a className="dropdown-item" href="ListagemDescarte">Listagem de Descartes</a>
               </div>
             </li>
+
+            <li className="nav-item">
+              <span
+                className="nav-link"
+                role="button"
+                onClick={() => {
+                  localStorage.clear(); 
+                  window.location.href = "/Login"; 
+                }}
+              >
+                Sair
+              </span>
+            </li>
+
 
           </ul>
         </div>
