@@ -1,9 +1,8 @@
 import React from "react";
-import Login from './views/Login';
+import Login from "./views/Login";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LoadingOverlay from "./LoadingOverlay";
-import RotaPrivada from './views/RotaPrivada';
-
+import RotaPrivada from "./views/RotaPrivada";
 
 // CADASTRO
 import CadastroPaciente from "./views/CadastroPaciente";
@@ -22,6 +21,7 @@ import CadastroAgendamento from "./views/CadastroAgendamento";
 import CadastroEstoque from "./views/CadastroEstoque";
 import CadastroLote from "./views/CadastroLote";
 import CadastroFornecedor from "./views/CadastroFornecedor";
+import CadastroComorbidade from "./views/CadastroComorbidade";
 
 // LISTAGEM
 import ListagemPacientes from "./views/ListagemPacientes";
@@ -38,6 +38,7 @@ import ListagemEstoques from "./views/ListagemEstoques";
 import ListagemLotes from "./views/ListagemLotes";
 import ListagemFornecedores from "./views/ListagemFornecedores";
 import ListagemTiposVacinas from "./views/ListagemTiposVacinas";
+import ListagemComorbidades from "./views/ListagemComorbidades";
 
 function Rotas() {
   const [loading, setLoading] = React.useState(true);
@@ -57,7 +58,6 @@ function Rotas() {
       <Routes>
         <Route path="/" element={<Navigate to="/Login" />} />
         <Route path="/Login" element={<Login />} />
-
 
         {/* ROTAS DE CADASTRO */}
         <Route path="/CadastroPaciente" element={<CadastroPaciente />} />
@@ -144,6 +144,12 @@ function Rotas() {
           element={<CadastroFornecedor />}
         />
 
+        <Route path="/CadastroComorbidade" element={<CadastroComorbidade />} />
+        <Route
+          path="/CadastroComorbidade/:idParam"
+          element={<CadastroComorbidade />}
+        />
+
         {/* ROTAS DE LISTAGEM */}
         <Route path="/ListagemPacientes" element={<ListagemPacientes />} />
         <Route path="/ListagemFabricantes" element={<ListagemFabricantes />} />
@@ -167,6 +173,10 @@ function Rotas() {
         <Route
           path="/ListagemTiposVacinas"
           element={<ListagemTiposVacinas />}
+        />
+        <Route
+          path="/ListagemComorbidades"
+          element={<ListagemComorbidades />}
         />
         {/* REDIRECIONAMENTO */}
       </Routes>

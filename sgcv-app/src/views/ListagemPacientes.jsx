@@ -1,107 +1,106 @@
-import React from 'react';
-import Card from '../components/Card';
-import { mensagemSucesso, mensagemErro } from '../components/toastr';
+import React from "react";
+import { useNavigate } from "react-router-dom";
 
-import '../custom.css'
+import Stack from "@mui/material/Stack";
 
-import { useNavigate } from 'react-router-dom';
+import Card from "../components/Card";
+import { mensagemSucesso, mensagemErro } from "../components/toastr";
+import LoadingOverlay from "../LoadingOverlay";
 
-import Stack from '@mui/material/Stack';
-import { IconButton } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
+import { IconButton } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 
-import axios from 'axios';
-import { BASE_URL } from '../config/axios';
-
-const baseURL = `${BASE_URL}/pacientes`;
+import "../custom.css";
+import axios from "axios";
+import { BASE_URL } from "../config/axios";
 
 function ListagemPacientes() {
   const navigate = useNavigate();
+  const baseURL = `${BASE_URL}/pacientes`;
 
-  const cadastrar = () => {
-    navigate(`/CadastroPaciente`);
+  const [pacientes, setPacientes] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+
+  const carregarPacientes = async () => {
+    try {
+      const response = await axios.get(baseURL);
+      setPacientes(response.data);
+    } catch (error) {
+      mensagemErro("Erro ao carregar pacientes.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const editar = (id) => {
+  React.useEffect(() => {
+    carregarPacientes();
+  }, []);
+
+  const redirecionarCadastro = () => {
+    navigate("/CadastroPaciente");
+  };
+
+  const redirecionarEdicao = (id) => {
     navigate(`/CadastroPaciente/${id}`);
   };
 
-  const [dados, setDados] = React.useState(null);
-
-  async function excluir(id) {
-    let data = JSON.stringify({ id });
-    let url = `${baseURL}/${id}`;
-    console.log(url);
-    await axios
-      .delete(url, data, {
-        headers: { 'Content-Type': 'application/json' },
-      })
-      .then(function (response) {
-        mensagemSucesso(`Paciente excluído com sucesso!`);
-        setDados(
-          dados.filter((dado) => {
-            return dado.id !== id;
-          })
-        );
-      })
-      .catch(function (error) {
-        mensagemErro(`Erro ao excluir funcionário`);
-      });
-  }
-
-  React.useEffect(() => {
-    axios.get(baseURL).then((response) => {
-      setDados(response.data);
-    });
-  }, []);
-
-  if (!dados) return null;
+  const excluirPaciente = async (id) => {
+    try {
+      await axios.delete(`${baseURL}/${id}`);
+      mensagemSucesso("Paciente excluído com sucesso.");
+      setPacientes((prev) => prev.filter((paciente) => paciente.id !== id));
+    } catch (error) {
+      mensagemErro("Erro ao excluir paciente.");
+      console.error(
+        "Erro ao excluir paciente.",
+        error.response?.data || error.message,
+      );
+    }
+  };
 
   return (
-    <div className='container'>
-      <Card title='Pacientes'>
-        <div className='row'>
-          <div className='col-lg-12'>
-            <div className='bs-component'>
+    <div className="container">
+      <Card title="Pacientes">
+        <div className="row">
+          <div className="col-lg-12">
+            <div className="bs-component">
               <button
-                type='button'
-                className='btn btn-warning'
-                onClick={() => cadastrar()}
+                type="button"
+                className="btn btn-warning"
+                onClick={redirecionarCadastro}
               >
                 Novo Paciente
               </button>
-              <table className='table table-hover'>
+              <table className="table table-hover">
                 <thead>
                   <tr>
-                    <th scope='col'>Nome</th>
-                    <th scope='col'>E-mail</th>
-                    <th scope='col'>DataNasc</th>
-                    <th scope='col'>Tipo de Sangue</th>
-                    <th scope='col'>DDD</th>
-                    <th scope='col'>Telefone</th>
+                    <th>Nome</th>
+                    <th>E-mail</th>
+                    <th>Data de Nascimento</th>
+                    <th>Tipo de Sangue</th>
+                    <th>DDD</th>
+                    <th>Telefone</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {dados.map((dado) => (
-                    <tr key={dado.id}>
-                      <td>{dado.nome}</td>
-                      <td>{dado.email}</td>
-                      <td>{dado.dataNasc}</td>
-                      <td>{dado.tipoSangue}</td>
-                      <td>{dado.ddd}</td>
-                      <td>{dado.telefone}</td>
+                  {pacientes.map((paciente) => (
+                    <tr key={paciente.id}>
+                      <td>{paciente.nome}</td>
+                      <td>{paciente.email}</td>
+                      <td>{paciente.dataNascimento}</td>
+                      <td>{paciente.tipoSanguineo}</td>
+                      <td>{paciente.telefoneDDD}</td>
+                      <td>{paciente.telefoneNumero}</td>
                       <td>
-                        <Stack spacing={1} padding={0} direction='row'>
+                        <Stack spacing={1} padding={0} direction="row">
                           <IconButton
-                            aria-label='edit'
-                            onClick={() => editar(dado.id)}
+                            onClick={() => redirecionarEdicao(paciente.id)}
                           >
                             <EditIcon />
                           </IconButton>
                           <IconButton
-                            aria-label='delete'
-                            onClick={() => excluir(dado.id)}
+                            onClick={() => excluirPaciente(paciente.id)}
                           >
                             <DeleteIcon />
                           </IconButton>
@@ -110,7 +109,7 @@ function ListagemPacientes() {
                     </tr>
                   ))}
                 </tbody>
-              </table>{' '}
+              </table>
             </div>
           </div>
         </div>

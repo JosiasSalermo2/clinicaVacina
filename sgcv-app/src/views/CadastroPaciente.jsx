@@ -26,7 +26,6 @@ function CadastroPaciente() {
   const [dataNasc, setDataNasc] = useState("");
   const [ddd, setDdd] = useState("");
   const [telefone, setTelefone] = useState("");
-  const [fotoPerfil, setFotoPerfil] = useState();
   const [logradouro, setLogradouro] = useState("");
   const [numero, setNumero] = useState("");
   const [complemento, setComplemento] = useState("");
@@ -57,7 +56,6 @@ function CadastroPaciente() {
       setDataNasc(paciente.dataNasc || "");
       setDdd(paciente.ddd || "");
       setTelefone(paciente.telefone || "");
-      setFotoPerfil(paciente.fotoPerfil || "");
       setLogradouro(paciente.logradouro || "");
       setNumero(paciente.numero || "");
       setComplemento(paciente.complemento || "");
@@ -94,9 +92,7 @@ function CadastroPaciente() {
     if (!String(telefone || "").trim()) {
       novosErros.telefone = "O campo Telefone é obrigatório.";
     }
-    if (!String(fotoPerfil || "").trim()) {
-      novosErros.fotoPerfil = "O campo Foto de Perfil é obrigatório.";
-    }
+
     if (!String(logradouro || "").trim()) {
       novosErros.logradouro = "O campo Logradouro é obrigatório.";
     }
@@ -135,7 +131,6 @@ function CadastroPaciente() {
       dataNasc,
       ddd,
       telefone,
-      fotoPerfil,
       logradouro,
       numero,
       complemento,
@@ -156,7 +151,6 @@ function CadastroPaciente() {
         setDataNasc("");
         setDdd("");
         setTelefone("");
-        setFotoPerfil("");
         setLogradouro("");
         setNumero("");
         setComplemento("");
@@ -191,7 +185,11 @@ function CadastroPaciente() {
                     className="form-control"
                     name="nome"
                     onChange={(e) => setNome(e.target.value)}
+                    required
                   />
+                  {erros.paciente && (
+                    <div className="invalid-feedback">{erros.paciente}</div>
+                  )}
                 </FormGroup>
               </div>
 
@@ -204,7 +202,11 @@ function CadastroPaciente() {
                     className="form-control"
                     name="email"
                     onChange={(e) => setEmail(e.target.value)}
+                    required
                   />
+                  {erros.email && (
+                    <div className="invalid-feedback">{erros.email}</div>
+                  )}
                 </FormGroup>
               </div>
 
@@ -217,7 +219,11 @@ function CadastroPaciente() {
                     className="form-control"
                     name="cpf"
                     onChange={(e) => setCpf(e.target.value)}
+                    required
                   />
+                  {erros.cpf && (
+                    <div className="invalid-feedback">{erros.cpf}</div>
+                  )}
                 </FormGroup>
               </div>
 
@@ -264,21 +270,6 @@ function CadastroPaciente() {
                     />
                   </FormGroup>
                 </div>
-                <div className="col-md-3 mb-3">
-                  <FormGroup
-                    label="Foto de perfil: "
-                    htmlFor="selectFotoPerfil"
-                  >
-                    <input
-                      type="file"
-                      id="selectFotoPerfil"
-                      value={fotoPerfil}
-                      className="form-control"
-                      name="idFotoPerfil"
-                      onChange={(e) => setFotoPerfil(e.target.value)}
-                    />
-                  </FormGroup>
-                </div>
               </div>
 
               <div className="col-md-12 mb-3">
@@ -304,6 +295,8 @@ function CadastroPaciente() {
                       id="inputNumero"
                       className="form-control"
                       name="numero"
+                      value={numero}
+                      onChange={(e) => setNumero(e.target.value)}
                     />
                   </FormGroup>
                 </div>
@@ -315,6 +308,8 @@ function CadastroPaciente() {
                       id="inputComplemento"
                       className="form-control"
                       name="complemento"
+                      value={complemento}
+                      onChange={(e) => setComplemento(e.target.value)}
                     />
                   </FormGroup>
                 </div>
@@ -326,6 +321,8 @@ function CadastroPaciente() {
                       id="inputCep"
                       className="form-control"
                       name="cep"
+                      value={cep}
+                      onChange={(e) => setCep(e.target.value)}
                     />
                   </FormGroup>
                 </div>
